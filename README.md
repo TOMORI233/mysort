@@ -169,9 +169,10 @@ $$
 
 ​		绘制第26和28道不同cluster的wave：
 
-<img src="wave-e26.jpg" height=350px>
-
-<img src="wave-e28.jpg" height=350px>
+<div style="display: flex">
+    <img src="wave-e26.jpg" width=50%>
+    <img src="wave-e28.jpg" width=50%>
+</div>
 
 ​		wave的结果显示，第26道电极cluster 1和cluster 3在波形上很接近，可以在后续处理中手动将这两类合并，而cluster 2的波形与其他相差很大。
 

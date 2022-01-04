@@ -1,4 +1,5 @@
 clear; close all; clc;
+addpath(genpath("Gap Statistic Algorithm\"));
 
 %% Load Your Data Here
 addpath('example\');
