@@ -12,13 +12,16 @@ function plotSSEorGap(result, visibilityOpt, saveFlag)
         set(Fig, "Visible", visibilityOpt);
 
         x = min([size(result(eIndex).pcaData, 1) min(result(eIndex).KArray)]):min([size(result(eIndex).pcaData, 1) max(result(eIndex).KArray)]);
-        yyaxis left
-        plot(x, result(eIndex).gaps, 'b-o', 'LineWidth', 2, 'DisplayName', 'Gap');
-        ylabel('Gaps');
-
-        yyaxis right
-        plot(x, result(eIndex).SSEs, 'r-o', 'LineWidth', 2, 'DisplayName', 'SSE');
-        ylabel('Sum of SSE');
+        
+        try
+            yyaxis left
+            plot(x, result(eIndex).gaps, 'b-o', 'LineWidth', 2, 'DisplayName', 'Gap');
+            ylabel('Gaps');
+    
+            yyaxis right
+            plot(x, result(eIndex).SSEs, 'r-o', 'LineWidth', 2, 'DisplayName', 'SSE');
+            ylabel('Sum of SSE');
+        end
 
         legend;
         title(['Channel: ' num2str(result(eIndex).chanIdx) ' | nSamples = ' num2str(size(result(eIndex).wave, 1)) ' | optimum K is ' num2str(result(eIndex).K)]);

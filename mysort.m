@@ -25,7 +25,7 @@ function sortResult = mysort(data, K)
 
     %% Params Settings
     sortOpts.fs = fs;
-    sortOpts.waveLength = 2e-3; % sec
+    sortOpts.waveLength = 1.5e-3; % sec
     sortOpts.scaleFactor = 1e6;
     sortOpts.CVCRThreshold = 0.9;
     sortOpts.KselectionMethod = "gap";

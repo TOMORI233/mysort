@@ -48,16 +48,14 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Data, CVCRThreshold, Ks
             % elbow method
             [K, SSEs] = elbow_method(pcaData, KmeansOpts);
             % Gap statistic
-            n_tests = 5;
-            KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
-            [~, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
+            gaps = [];
         elseif strcmp(KselectionMethod, "gap")
             % Gap statistic
             n_tests = 5;
             KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
             [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
             % elbow method
-            [~, SSEs] = elbow_method(pcaData, KmeansOpts);
+            SSEs = [];
         end
 
     end
