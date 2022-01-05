@@ -27,7 +27,7 @@ function plotWave(result, visibilityOpt, saveFlag)
                     yMin = min(result(eIndex).wave(result(eIndex).clusterIdx ~= 0, :), [], "all");
                     yMax = max(result(eIndex).wave(result(eIndex).clusterIdx ~= 0, :), [], "all");
 
-                    for pIndex = 1:size(plotData, 1)
+                    for pIndex = 1:min([200, size(plotData, 1)])
                         y = interp1(x, plotData(pIndex, :), xSmooth, 'cubic');
                         h = plot(xSmooth, y, 'b', 'DisplayName', 'Samples');
                         hold on;

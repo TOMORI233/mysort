@@ -31,7 +31,7 @@ function plotPCA(result, PCShown, visibilityOpt, saveFlag)
                 plot3(x, y, z, '.', 'MarkerSize', 12, 'DisplayName', ['cluster ' num2str(index)]); hold on;
                 h = plot3(cx, cy, cz, 'kh', 'LineWidth', 1.2, 'MarkerSize', 15);
                 grid on;
-                zlabel(['PC' num2str(PCz)]);
+                zlabel(['PC-' num2str(PCz)]);
             else
                 plot(x, y, '.', 'MarkerSize', 12, 'DisplayName', ['cluster ' num2str(index)]); hold on;
                 h = plot(cx, cy, 'kx', 'LineWidth', 1.2, 'MarkerSize', 15);
@@ -56,8 +56,8 @@ function plotPCA(result, PCShown, visibilityOpt, saveFlag)
 
         legend;
         title(['Channel: ' num2str(result(eIndex).chanIdx)]);
-        xlabel(['PC ' num2str(PCx)]);
-        ylabel(['PC ' num2str(PCy)]);
+        xlabel(['PC-' num2str(PCx)]);
+        ylabel(['PC-' num2str(PCy)]);
 
         if saveFlag
             figPath = 'pca figs';
