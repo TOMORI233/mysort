@@ -4,8 +4,10 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     %              If Waveforms is specified, the input waves will be ignored.
     % Input:
     %     waves: raw wave data, channels(electrodes) along row
-    %     channels: a channel(electrode) number column vector, each element specifies a channel(electrode) number for a waveform
-    %               Possible artifacts in spikes will be excluded according to amplitude.
+    %     channels: a channel(electrode) number column vector, each element
+    %               specifies a channel(electrode) number for an entire
+    %               wave. If Waveforms is specified, each element of
+    %               channels specifies a channel number for each waveform.
     %     sortOpts: a sorting settings struct containing:
     %               - th: threshold for spike extraction, in volts (default: 1e-5)
     %               - fs: sampling rate, in Hz
@@ -41,6 +43,8 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     %     % channels is an m×1 column vector, which specifies the channel number of each wave sample
     %     result = sortMultiChannel(waves, channels, sortOpts);
     %     % 2. Use extracted waveforms
+    %     % Waveforms is an m×n matrix, with channels along row and waveform points along column
+    %     % channels is an m×1 column vector, which specifies the channel number of each waveform
     %     result = sortMultiChannel([], channels, sortOpts, Waveforms);
 
     narginchk(3, 4);
@@ -57,12 +61,12 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
         % Waveforms: waveforms along row
         Waveforms = [];
-        mChannels = [];
+        mChannels = []; % channel(electrode) number for each waveform
         spikeIndex = [];
 
         %% Waveforms Extraction
         % For each channel
-        for eIndex = 1:size(channels, 1)
+        for eIndex = 1:length(channels)
             wave = waves(eIndex, :);
             [spikes, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th, "MinPeakDistance", ceil(waveLength / 2 * fs));
             meanSpike = mean(spikes);
@@ -107,6 +111,10 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
         result(eIndex).chanIdx = channelUnique(eIndex);
         result(eIndex).wave = data / scaleFactor;
+
+        if isfield(sortOpts, "th")
+            result(eIndex).th = sortOpts.th;
+        end
 
         if exist("spikeIndex", "var")
             result(eIndex).spikeTimeAll = (spikeIndex{eIndex} - 1) / fs;
