@@ -1,12 +1,15 @@
 clear; close all; clc;
-addpath(genpath("Gap Statistic Algorithm\"));
+addpath(genpath("..\mysort"));
 
 %% Load Your Data Here
 addpath('example\');
 load('example.mat'); % TDT Block
 
 %% Sort
-sortResult = mysort(data, [], "origin");
+% sortResult = mysort(data);
+sortResult = mysort(data, "origin");
+% sortResult = mysort(data, "origin", 2);
+% sortResult = mysort(data, "reselect", 2);
 
 %% Plot
 plotSSEorGap(sortResult);

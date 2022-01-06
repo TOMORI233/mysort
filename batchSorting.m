@@ -1,10 +1,10 @@
-function result = batchSorting(waves, Electrodes, sortOpts, Waveforms)
+function result = batchSorting(waves, channels, sortOpts, Waveforms)
     % Description: batch sorting result for each channel(electrode)
     %              If waves is specified, Waveforms of raw data will be generated.
     %              If Waveforms is specified, the input waves will be ignored.
     % Input:
     %     waves: raw wave data, channels(electrodes) along row
-    %     Electrodes: a channel(electrode) number column vector, each element specifies a channel(electrode) number for a waveform
+    %     channels: a channel(electrode) number column vector, each element specifies a channel(electrode) number for a waveform
     %               Possible artifacts in spikes will be excluded according to amplitude.
     %     sortOpts: a sorting settings struct containing:
     %               - th: threshold for spike extraction, in volts (default: 1e-5)
@@ -35,12 +35,12 @@ function result = batchSorting(waves, Electrodes, sortOpts, Waveforms)
     %             - gaps: gap statistic result
     %             - pcaData: PCA result of spike waveforms
     %             - clusterCenter: samples along row, in PCA space
-    % Example:
-    %     % Use raw wave data
+    % Usage:
+    %     % 1. Use raw wave data
     %     % waves is an m×n matrix, with channels along row and sampling points along column
     %     % channels is an m×1 column vector, which specifies the channel number of each wave sample
     %     result = sortMultiChannel(waves, channels, sortOpts);
-    %     % Or use extracted waveforms
+    %     % 2. Use extracted waveforms
     %     result = sortMultiChannel([], channels, sortOpts, Waveforms);
 
     narginchk(3, 4);
@@ -57,12 +57,12 @@ function result = batchSorting(waves, Electrodes, sortOpts, Waveforms)
 
         % Waveforms: waveforms along row
         Waveforms = [];
-        channels = [];
+        mChannels = [];
         spikeIndex = [];
 
         %% Waveforms Extraction
         % For each channel
-        for eIndex = 1:size(Electrodes, 1)
+        for eIndex = 1:size(channels, 1)
             wave = waves(eIndex, :);
             [spikes, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th, "MinPeakDistance", ceil(waveLength / 2 * fs));
             meanSpike = mean(spikes);
@@ -78,7 +78,7 @@ function result = batchSorting(waves, Electrodes, sortOpts, Waveforms)
                     % Exclude possible artifacts
                     if spikes(sIndex) <= meanSpike + 3 * stdSpike
                         Waveforms = [Waveforms; wave(spikeIndexAll(sIndex) - floor(waveLength / 2 * fs) + 1:spikeIndexAll(sIndex) + floor(waveLength / 2 * fs))];
-                        channels = [channels; Electrodes(eIndex)];
+                        mChannels = [mChannels; channels(eIndex)];
                         spikeIndexTemp = [spikeIndexTemp; spikeIndexAll(sIndex)];
                     end
 
@@ -94,16 +94,16 @@ function result = batchSorting(waves, Electrodes, sortOpts, Waveforms)
         end
 
     elseif nargin == 4
-        channels = Electrodes;
+        mChannels = channels;
     end
 
     %% Batch Sorting
-    channelUnique = unique(channels);
+    channelUnique = unique(mChannels);
     disp('Sorting...');
 
     % For each channel
     for eIndex = 1:length(channelUnique)
-        data = double(Waveforms(channels == channelUnique(eIndex), :));
+        data = double(Waveforms(mChannels == channelUnique(eIndex), :));
 
         result(eIndex).chanIdx = channelUnique(eIndex);
         result(eIndex).wave = data / scaleFactor;

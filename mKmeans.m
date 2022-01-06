@@ -96,6 +96,8 @@ function [idx, C, sumd] = mKmeans(pcaData, K, KmeansOpts)
                 end
 
                 hold off;
+                xlabel('PC-1');
+                ylabel('PC-2');
                 title(['K = ' num2str(K) ', iteration: ' num2str(nIteration)]);
                 drawnow;
             end

@@ -30,6 +30,8 @@ function plotSSEorGap(result, visibilityOpt, saveFlag)
             yyaxis right
             plot(x, result(eIndex).SSEs, 'r-o', 'LineWidth', 2, 'DisplayName', 'SSE');
             ylabel('Sum of SSE');
+        catch
+            warning('SSEs or gaps data missing, check if K is specified by user or KselectionMethod is not "both"');
         end
 
         legend;
