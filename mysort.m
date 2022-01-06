@@ -24,7 +24,7 @@ function sortResult = mysort(data, thOpt, K)
     %     sortResult = mysort(data, "origin"); % use spikes of input data and an optimum K
     %     sortResult = mysort(data, "reselect", 3); % reselect th for spikes and specify K as 3
     %     spikes = sortResult.spikeTimeAll(sortResult.clusterIdx == 1); % spike times of cluster 1
-    
+
     narginchk(1, 3);
 
     if nargin == 1
@@ -79,6 +79,7 @@ function sortResult = mysort(data, thOpt, K)
 
         end
 
+        Waveforms = Waveforms * sortOpts.scaleFactor;
         disp('Waveforms extraction done.');
         channel = channel * ones(size(Waveforms, 1), 1);
         sortResult = batchSorting([], channel, sortOpts, Waveforms);
