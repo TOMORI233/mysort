@@ -1,73 +1,129 @@
-clear; close all; clc;
-addpath(genpath("Gap Statistic Algorithm\"));
+function result = batchSorting(waves, Electrodes, sortOpts, Waveforms)
+    % Description: batch sorting result for each channel(electrode)
+    %              If waves is specified, Waveforms of raw data will be generated.
+    %              If Waveforms is specified, the input waves will be ignored.
+    % Input:
+    %     waves: raw wave data, channels(electrodes) along row
+    %     Electrodes: a channel(electrode) number column vector, each element specifies a channel(electrode) number for a waveform
+    %               Possible artifacts in spikes will be excluded according to amplitude.
+    %     sortOpts: a sorting settings struct containing:
+    %               - th: threshold for spike extraction, in volts (default: 1e-5)
+    %               - fs: sampling rate, in Hz
+    %               - waveLength: waveform length, in seconds (default: 1.5e-3)
+    %               - scaleFactor: scale factor for waveforms (default: 1e+6)
+    %               - CVCRThreshold: cumulative variance contribution rate threshold for principal components selection (default: 0.9)
+    %               - KselectionMethod: "elbow" or "gap", method used to find an optimum K value for K-means
+    %                                   - "elbow": use elbow method
+    %                                   - "gap": use gap statistic (default)
+    %                                   - "both": use gap statistic but also return SSE result of elbow method
+    %               - KmeansOpts: kmeans settings, a struct containing:
+    %                                   - KArray: possible K values for K-means (default: 1:10)
+    %                                   - maxIteration: maximum number of iterations (default: 100)
+    %                                   - maxRepeat: maximum number of times to repeat kmeans (default: 5)
+    %                                   - plotIterationNum: number of iterations to plot (default: 0)
+    %                                   - K: user-specified K. If left empty, an optimum K will be calculated and used
+    %     Waveforms: waveforms of spikes, from spikeTime - waveLength/2 to spikeTime + waveLength/2, channels along row
+    % Output:
+    %     result: a struct array, each element of which is a result of one channel(electrode), containing fields:
+    %             - chanIdx: channel(electrode) number
+    %             - wave: spike waveforms of this channel(electrode), samples along row
+    %             - spikeTimeAll: spike time of raw wave data (if used), noise included
+    %             - clusterIdx: cluster index of each spike waveform sample, with 0 as noise
+    %             - K: optimum K used in K-means
+    %             - KArray: possible K values
+    %             - SSEs: elbow method result
+    %             - gaps: gap statistic result
+    %             - pcaData: PCA result of spike waveforms
+    %             - clusterCenter: samples along row, in PCA space
+    % Example:
+    %     % Use raw wave data
+    %     % waves is an m×n matrix, with channels along row and sampling points along column
+    %     % channels is an m×1 column vector, which specifies the channel number of each wave sample
+    %     result = sortMultiChannel(waves, channels, sortOpts);
+    %     % Or use extracted waveforms
+    %     result = sortMultiChannel([], channels, sortOpts, Waveforms);
 
-%% Load Your Data Here
-addpath('example\');
-load('example.mat'); % TDT Block
+    narginchk(3, 4);
 
-%% Params Settings
-waves = data.streams.Wave.data;
-fs = data.streams.Wave.fs; % Hz
-channels = data.streams.Wave.channel;
+    scaleFactor = sortOpts.scaleFactor;
+    CVCRThreshold = sortOpts.CVCRThreshold;
+    KselectionMethod = sortOpts.KselectionMethod;
+    KmeansOpts = sortOpts.KmeansOpts;
 
-t = (0:length(waves) - 1) / fs;
+    if nargin == 3
+        th = sortOpts.th; % V
+        fs = sortOpts.fs; % Hz
+        waveLength = sortOpts.waveLength; % sec
 
-sortOpts.fs = fs;
-sortOpts.waveLength = 2e-3; % sec
-sortOpts.scaleFactor = 1e6;
-sortOpts.CVCRThreshold = 0.9;
-sortOpts.KselectionMethod = "gap";
-KmeansOpts.KArray = 1:10;
-KmeansOpts.maxIteration = 100;
-KmeansOpts.maxRepeat = 5;
-KmeansOpts.plotIterationNum = 0;
-% KmeansOpts.K = 2;
-sortOpts.KmeansOpts = KmeansOpts;
+        % Waveforms: waveforms along row
+        Waveforms = [];
+        channels = [];
+        spikeIndex = [];
 
-%% Select Th
-figure;
-plot(t, waves, 'b');
-xlabel('Time (sec)');
-ylabel('Voltage (V)');
+        %% Waveforms Extraction
+        % For each channel
+        for eIndex = 1:size(Electrodes, 1)
+            wave = waves(eIndex, :);
+            [spikes, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th, "MinPeakDistance", ceil(waveLength / 2 * fs));
+            meanSpike = mean(spikes);
+            stdSpike = std(spikes);
+            spikeIndexTemp = [];
+            disp('Waveforms extraction...');
 
-sortOpts.th = input('Input th (V): ');
-% sortOpts.th = 3e-5; % example
+            for sIndex = 1:length(spikeIndexAll)
 
-%% Sort
-sortResult = sortMultiChannel(waves, channels, sortOpts);
-% result = sortMultiChannel([], [], sortOpts, Waveforms, Electrode);
+                % Ignore the beginning and the end of the wave
+                if spikeIndexAll(sIndex) - floor(waveLength / 2 * fs) > 0 && spikeIndexAll(sIndex) + floor(waveLength / 2 * fs) <= size(wave, 2)
 
-%% Plot
-% load('result.mat');
-visibilityOpt = "on";
-saveFlag = false;
-plotSSEorGap(sortResult, visibilityOpt, saveFlag);
-plotPCA(sortResult, [1 2 3], visibilityOpt, saveFlag);
-plotWave(sortResult, visibilityOpt, saveFlag);
+                    % Exclude possible artifacts
+                    if spikes(sIndex) <= meanSpike + 3 * stdSpike
+                        Waveforms = [Waveforms; wave(spikeIndexAll(sIndex) - floor(waveLength / 2 * fs) + 1:spikeIndexAll(sIndex) + floor(waveLength / 2 * fs))];
+                        channels = [channels; Electrodes(eIndex)];
+                        spikeIndexTemp = [spikeIndexTemp; spikeIndexAll(sIndex)];
+                    end
 
-%% Show Example
-windowParams.window = [-1000 2000]; % ms
-windowParams.step = 10; % ms
-windowParams.binSize = 100; % ms
-plotSettings.rasterHeightTotal = 0.8;
-plotSettings.rasterWidth = 0.2;
-plotSettings.gridAlpha = 0.3;
-plotSettings.colors = ['k', 'b', 'r', 'g', 'y'];
-plotSettings.visibilityOpt = "on";
-normalizationSettings.baselineWindow = [-600 -100];
-% normalizationSettings.plotOption = 'normalize';
-normalizationSettings.plotOption = 'origin';
+                end
 
-exampleResult.monkeyNum = 4;
-exampleResult.cellNum = 5;
-exampleResult.windowParams = windowParams;
-exampleResult.normalizationSettings = normalizationSettings;
-exampleResult.data = NoiseDurationResponseProcess(data, windowParams, normalizationSettings);
-fig = plotNoiseDurationResponse(exampleResult, plotSettings, normalizationSettings);
-set(fig, "Name", "Origin");
+            end
 
-for cIndex = 1:sortResult.K
-    exampleResult.data = NoiseDurationResponseProcess(data, windowParams, normalizationSettings, sortResult, cIndex);
-    fig = plotNoiseDurationResponse(exampleResult, plotSettings, normalizationSettings);
-    set(fig, "Name", ['Sorted - cluster ' num2str(cIndex)]);
+            disp('Waveforms extraction done.');
+            spikeIndex = [spikeIndex; {spikeIndexTemp}];
+
+            % Scale
+            Waveforms = Waveforms * scaleFactor;
+        end
+
+    elseif nargin == 4
+        channels = Electrodes;
+    end
+
+    %% Batch Sorting
+    channelUnique = unique(channels);
+    disp('Sorting...');
+
+    % For each channel
+    for eIndex = 1:length(channelUnique)
+        data = double(Waveforms(channels == channelUnique(eIndex), :));
+
+        result(eIndex).chanIdx = channelUnique(eIndex);
+        result(eIndex).wave = data / scaleFactor;
+
+        if exist("spikeIndex", "var")
+            result(eIndex).spikeTimeAll = (spikeIndex{eIndex} - 1) / fs;
+        end
+
+        % Perform single channel sorting
+        [clusterIdx, SSEs, gaps, optimumK, pcaData, clusterCenter] = spikeSorting(data, CVCRThreshold, KselectionMethod, KmeansOpts);
+        
+        result(eIndex).clusterIdx = clusterIdx;
+        result(eIndex).K = optimumK;
+        result(eIndex).KArray = KmeansOpts.KArray;
+        result(eIndex).SSEs = SSEs;
+        result(eIndex).gaps = gaps;
+        result(eIndex).pcaData = pcaData;
+        result(eIndex).clusterCenter = clusterCenter;
+    end
+
+    disp('Sorting done.')
+    return;
 end

@@ -24,7 +24,7 @@ function sortResult = mysort(data, thOpts, K)
 
     if nargin == 1
         thOpts = "reselect";
-    elseif nargin == 3
+    elseif nargin == 2
         KmeansOpts.K = K;
     end
 

@@ -1,11 +1,12 @@
 function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Data, CVCRThreshold, KselectionMethod, KmeansOpts)
-    % Description: Using PCA and K-means for spike sorting
+    % Description: use PCA and K-means for single channel spike sorting
     % Input:
     %     Data: samples along row, each column represents a feature
     %     CVCRThreshold: cumulative variance contribution rate threshold for principal components selection
     %     KselectionMethod: "elbow" or "gap", method used to find an optimum K value for K-means
     %                       - "elbow": use elbow method
     %                       - "gap": use gap statistic
+    %                       - "both": use gap statistic but also return SSE result of elbow method
     %     KmeansOpts: kmeans settings, a struct containing:
     %                 - KArray: possible K values for K-means
     %                 - maxIteration: maximum number of iterations
@@ -38,7 +39,7 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Data, CVCRThreshold, Ks
 
     %% K-means
     % Find an optimum K for K-means
-    if isfield(KmeansOpts, "K")
+    if isfield(KmeansOpts, "K") && ~isempty(KmeansOpts.K)
         K = KmeansOpts.K;
         SSEs = [];
         gaps = [];
@@ -47,15 +48,18 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Data, CVCRThreshold, Ks
         if strcmp(KselectionMethod, "elbow")
             % elbow method
             [K, SSEs] = elbow_method(pcaData, KmeansOpts);
-            % Gap statistic
             gaps = [];
         elseif strcmp(KselectionMethod, "gap")
             % Gap statistic
             n_tests = 5;
             KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
             [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
-            % elbow method
             SSEs = [];
+        elseif strcmp(KselectionMethod, "both")
+            n_tests = 5;
+            KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
+            [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
+            [~, SSEs] = elbow_method(pcaData, KmeansOpts);
         end
 
     end
