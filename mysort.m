@@ -47,7 +47,7 @@ function sortResult = mysort(data, thOpt, K)
     sortOpts.KselectionMethod = "gap";
     KmeansOpts.KArray = 1:10;
     KmeansOpts.maxIteration = 100;
-    KmeansOpts.maxRepeat = 5;
+    KmeansOpts.maxRepeat = 3;
     KmeansOpts.plotIterationNum = 0;
     sortOpts.KmeansOpts = KmeansOpts;
 
@@ -60,7 +60,7 @@ function sortResult = mysort(data, thOpt, K)
         xlabel('Time (sec)');
         ylabel('Voltage (V)');
         sortOpts.th = input('Input threshold for spike extraction (unit: V): ');
-        
+
         channels = 1:size(waves, 1);
         sortResult = batchSorting(waves, channels, sortOpts);
     elseif strcmp(thOpt, "origin-reshape")

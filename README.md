@@ -40,3 +40,7 @@ sortResult = mysort(data, "reselect");
 
 This will plot a time-wave curve of at most 30 seconds for preview. When a threshold (in volts) is input in MATLAB command line, the sorting process continues.
 
+Still not satisfied? You can specify `CVCRThreshold` (cumulative variance contribution rate threshold, default: 0.9) for PC dimensions selection or convergence condition for K-means in `mKmeans.m` (usually a minimum ratio of relative cluster center shift in Euclidean distance, default: 0.1).
+
+Also you can use MATLAB `pca` and `kmeans` functions instead of `mPCA` and `mKmeans` in `spikeSorting.m`.
+

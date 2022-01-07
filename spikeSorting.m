@@ -22,20 +22,21 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(wave, CVCRThreshold, Ks
     %     C: cluster centers
 
     %% PCA
-    [V, S, k] = mPCA(wave, CVCRThreshold);
-    pcaData = S(:, 1:k);
+    % default: use mPCA
+    % [V, S, k] = mPCA(wave, CVCRThreshold);
+    % pcaData = S(:, 1:k);
 
     % MATLAB - pca
-    % [coeff, SCORE, latent] = pca(Data);
-    % explained = latent / sum(latent);
-    % contrib = 0;
-    % for index = 1:size(explained, 1)
-    %     contrib = contrib + explained(index);
-    %     if contrib >= CVCRThreshold
-    %         pcaData = SCORE(:, 1:index);
-    %         break;
-    %     end
-    % end
+    [coeff, SCORE, latent] = pca(wave);
+    explained = latent / sum(latent);
+    contrib = 0;
+    for index = 1:size(explained, 1)
+        contrib = contrib + explained(index);
+        if contrib >= CVCRThreshold
+            pcaData = SCORE(:, 1:index);
+            break;
+        end
+    end
 
     %% K-means
     % Find an optimum K for K-means
@@ -68,9 +69,10 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(wave, CVCRThreshold, Ks
         K = 1;
     end
 
+    % default: use mKmeans
+    % [idx, C, ~] = mKmeans(pcaData, K, KmeansOpts);
     % MATLAB - kmeans
-    % [idx, C, ~] = kmeans(pcaData, K, 'MaxIter', KmeansOpts.maxIteration, 'Distance', 'sqeuclidean', 'Replicates', KmeansOpts.maxRepeat, 'Options', statset('Display', 'final'));
-    [idx, C, ~] = mKmeans(pcaData, K, KmeansOpts);
+    [idx, C, ~] = kmeans(pcaData, K, 'MaxIter', KmeansOpts.maxIteration, 'Distance', 'sqeuclidean', 'Replicates', KmeansOpts.maxRepeat, 'Options', statset('Display', 'final'));
 
     % Exclude noise
     distance = [];

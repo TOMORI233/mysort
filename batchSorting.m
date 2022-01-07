@@ -122,7 +122,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
         % Perform single channel sorting
         [clusterIdx, SSEs, gaps, optimumK, pcaData, clusterCenter] = spikeSorting(data, CVCRThreshold, KselectionMethod, KmeansOpts);
-        
+
         result(eIndex).clusterIdx = clusterIdx;
         result(eIndex).K = optimumK;
         result(eIndex).KArray = KmeansOpts.KArray;
