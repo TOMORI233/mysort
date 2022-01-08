@@ -5,14 +5,14 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
     %     CVCRThreshold: cumulative variance contribution rate threshold for principal components selection
     %     KselectionMethod: "elbow" or "gap", method used to find an optimum K value for K-means
     %                       - "elbow": use elbow method
-    %                       - "gap": use gap statistic
+    %                       - "gap": use gap statistic (default)
     %                       - "both": use gap statistic but also return SSE result of elbow method
     %     KmeansOpts: kmeans settings, a struct containing:
-    %                 - KArray: possible K values for K-means
-    %                 - maxIteration: maximum number of iterations
-    %                 - maxRepeat: maximum number of times to repeat kmeans
-    %                 - plotIterationNum: number of iterations to plot
-    %                 - K: user-specified K. If left empty, an optimum K will be calculated and used
+    %                 - KArray: possible K values for K-means (default: 1:10)
+    %                 - maxIteration: maximum number of iterations (default: 100)
+    %                 - maxRepeat: maximum number of times to repeat kmeans (default: 3)
+    %                 - plotIterationNum: number of iterations to plot (default: 0)
+    %                 - K: user-specified K. If left empty, an optimum K will be calculated and used (default: [])
     % Output:
     %     idx: cluster index of each sample, with 0 as noise
     %     SSEs: by elbow method
@@ -20,6 +20,22 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
     %     K: optimum K value for K-means
     %     pcaData: SCORE of PCA result
     %     C: cluster centers
+
+    narginchk(1, 4);
+
+    if nargin < 4
+        KmeansOpts.KArray = 1:10;
+        KmeansOpts.maxIteration = 100;
+        KmeansOpts.maxRepeat = 3;
+        KmeansOpts.plotIterationNum = 0;
+    end
+
+    if nargin == 1
+        CVCRThreshold = 0.9;
+        KselectionMethod = 'gap';
+    elseif nargin == 2
+        KselectionMethod = 'gap';
+    end
 
     %% PCA
     % default: use mPCA
