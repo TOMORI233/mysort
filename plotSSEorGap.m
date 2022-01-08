@@ -21,12 +21,12 @@ function plotSSEorGap(result, visibilityOpt, saveFlag)
         set(Fig, "Visible", visibilityOpt);
 
         x = min([size(result(eIndex).pcaData, 1) min(result(eIndex).KArray)]):min([size(result(eIndex).pcaData, 1) max(result(eIndex).KArray)]);
-        
+
         try
             yyaxis left
             plot(x, result(eIndex).gaps, 'b-o', 'LineWidth', 2, 'DisplayName', 'Gap');
             ylabel('Gaps');
-    
+
             yyaxis right
             plot(x, result(eIndex).SSEs, 'r-o', 'LineWidth', 2, 'DisplayName', 'SSE');
             ylabel('Sum of SSE');

@@ -52,6 +52,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         channels = (1:size(waves, 1))';
     end
 
+    % sortOpts initialization
     if nargin < 3
         sortOpts.th = 1e-5 * ones(1, length(channels));
         sortOpts.fs = 12207.03;
@@ -88,8 +89,9 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         for eIndex = 1:length(channels)
             wave = waves(eIndex, :);
             warning off;
+            disp('Extracting spikes...');
             [spikes, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(eIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
-            
+
             if isempty(spikes)
                 continue;
             end
@@ -97,6 +99,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
             meanSpike = mean(spikes);
             stdSpike = std(spikes);
             spikeIndexTemp = [];
+            disp('Generating Waveforms...');
 
             for sIndex = 1:length(spikes)
 
@@ -128,6 +131,11 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
     %% Batch Sorting
     channelUnique = unique(mChannels);
+
+    if isempty(channelUnique)
+        error('No channels specified');
+    end
+
     disp('Sorting...');
 
     % For each channel

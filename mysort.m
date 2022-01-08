@@ -3,8 +3,9 @@ function sortResult = mysort(data, channels, thOpt, K)
     % Input:
     %     data: TDT Block data, specified as a struct
     %           It should at least contain streams.Wave
-    %     channels: channels to sort. If left empty, all channels of Wave will be sorted. (default: [])
-    %     thOpt: "origin" | "origin-reshape" | "reselect"(default) 
+    %     channels: channels to sort, specified as a vector of channel numbers.
+    %               If left empty, all channels of Wave will be sorted. (default: [])
+    %     thOpt: "origin" | "origin-reshape" | "reselect"(default)
     %             - "origin": use spike waveform of input data
     %             - "origin-reshape": use original spike data but reshape waveforms by user-specified wave length
     %             - "reselect": show at most 30 sec of wave for reselecting threshold for spikes extraction
@@ -79,6 +80,7 @@ function sortResult = mysort(data, channels, thOpt, K)
         sortResult = batchSorting(waves, channels, sortOpts);
     elseif strcmp(thOpt, "origin-reshape")
         %% Use Original Spikes for Waveform Extraction by user-specified wave length
+        % TODO: Waveform reshape for multiple channels
         Waveforms = [];
         t = (0:length(waves) - 1) / fs;
         spikeTimeAll = data.snips.eNeu.ts; % sec
@@ -100,6 +102,7 @@ function sortResult = mysort(data, channels, thOpt, K)
         sortResult.spikeTimeAll = spikeTimeAll;
     elseif strcmp(thOpt, "origin")
         %% Use Original Spike Waveforms of data
+        % TODO: Waveform specification for multiple channels
         Waveforms = data.snips.eNeu.data * sortOpts.scaleFactor;
         channels = data.snips.eNeu.chan;
         sortResult = batchSorting([], channels, sortOpts, Waveforms);

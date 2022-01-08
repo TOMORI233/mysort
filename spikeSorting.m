@@ -46,12 +46,15 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
     [coeff, SCORE, latent] = pca(Waveforms);
     explained = latent / sum(latent);
     contrib = 0;
+
     for index = 1:size(explained, 1)
         contrib = contrib + explained(index);
+
         if contrib >= CVCRThreshold
             pcaData = SCORE(:, 1:index);
             break;
         end
+
     end
 
     %% K-means
