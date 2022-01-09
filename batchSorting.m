@@ -167,7 +167,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         result(eIndex).pcaData = pcaData;
         result(eIndex).clusterCenter = clusterCenter;
 
-        disp(['Channel ', num2str(channelUnique(eIndex)), ' sorting finished.']);
+        disp(['Channel ', num2str(channelUnique(eIndex)), ' sorting finished. nClusters = ', num2str(optimumK)]);
     end
 
     disp('Sorting done.')
