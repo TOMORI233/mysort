@@ -84,8 +84,6 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
         %% Waveforms Extraction
         % For each channel
-        disp('Extracting Waveforms...');
-
         for eIndex = 1:length(channels)
             wave = waves(eIndex, :);
             warning off;
@@ -99,7 +97,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
             meanSpike = mean(spikes);
             stdSpike = std(spikes);
             spikeIndexTemp = [];
-            disp('Generating Waveforms...');
+            disp('Extracting Waveforms...');
 
             for sIndex = 1:length(spikes)
 
@@ -117,7 +115,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
             end
 
-            disp(['Waveforms extraction from channel ', num2str(channels(eIndex)), ' done. nSpikes = ', num2str(length(spikes))]);
+            disp(['Channel ', num2str(channels(eIndex)), ' done. nSpikes = ', num2str(length(spikes))]);
             spikeIndex = [spikeIndex; {spikeIndexTemp}];
 
             % Scale

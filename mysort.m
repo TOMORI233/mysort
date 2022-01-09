@@ -84,7 +84,7 @@ function sortResult = mysort(data, channels, thOpt, K)
         Waveforms = [];
         t = (0:length(waves) - 1) / fs;
         spikeTimeAll = data.snips.eNeu.ts; % sec
-        disp('Waveforms extraction...');
+        disp('Extracting Waveforms...');
 
         for sIndex = 1:length(spikeTimeAll)
             spikeTimeIndex = roundn(spikeTimeAll(sIndex) * fs, 0) - 1;
