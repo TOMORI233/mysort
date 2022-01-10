@@ -13,10 +13,11 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     %               - waveLength: waveform length, in seconds (default: 1.5e-3)
     %               - scaleFactor: scale factor for waveforms (default: 1e+6)
     %               - CVCRThreshold: cumulative variance contribution rate threshold for principal components selection (default: 0.9)
-    %               - KselectionMethod: "elbow" or "gap", method used to find an optimum K value for K-means
+    %               - KselectionMethod: method used to find an optimum K value for K-means
     %                                   - "elbow": use elbow method
     %                                   - "gap": use gap statistic (default)
     %                                   - "both": use gap statistic but also return SSE result of elbow method
+    %                                   - "preview": plot 3-D PCA data and use an input K from user
     %               - KmeansOpts: kmeans settings, a struct containing:
     %                                   - KArray: possible K values for K-means (default: 1:10)
     %                                   - maxIteration: maximum number of iterations (default: 100)
@@ -86,7 +87,6 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         % For each channel
         for eIndex = 1:length(channels)
             wave = waves(eIndex, :);
-            warning off;
             disp('Extracting spikes...');
             [spikes, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(eIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
 

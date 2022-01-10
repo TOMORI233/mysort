@@ -3,10 +3,11 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
     % Input:
     %     Waveforms: samples along row, each column represents a feature
     %     CVCRThreshold: cumulative variance contribution rate threshold for principal components selection
-    %     KselectionMethod: "elbow" or "gap", method used to find an optimum K value for K-means
+    %     KselectionMethod: method used to find an optimum K value for K-means
     %                       - "elbow": use elbow method
     %                       - "gap": use gap statistic (default)
     %                       - "both": use gap statistic but also return SSE result of elbow method
+    %                       - "preview": plot 3-D PCA data and use an input K from user
     %     KmeansOpts: kmeans settings, a struct containing:
     %                 - KArray: possible K values for K-means (default: 1:10)
     %                 - maxIteration: maximum number of iterations (default: 100)
@@ -38,6 +39,7 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
     end
 
     %% PCA
+    disp('Performing PCA on Waveforms...');
     % default: use mPCA
     % [V, S, k] = mPCA(Waveforms, CVCRThreshold);
     % pcaData = S(:, 1:k);
@@ -59,27 +61,45 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
 
     %% K-means
     % Find an optimum K for K-means
-    if isfield(KmeansOpts, "K") && ~isempty(KmeansOpts.K)
-        K = KmeansOpts.K;
-        SSEs = [];
-        gaps = [];
-    else
+    SSEs = [];
+    gaps = [];
 
-        if strcmp(KselectionMethod, "elbow")
+    if isfield(KmeansOpts, "K") && ~isempty(KmeansOpts.K)
+        disp('Using user-speciified K for clustering.');
+        K = KmeansOpts.K;
+    else
+        disp('Searching for an optimum K for clustering ...');
+
+        if strcmpi(KselectionMethod, "elbow")
             % elbow method
             [K, SSEs] = elbow_method(pcaData, KmeansOpts);
-            gaps = [];
-        elseif strcmp(KselectionMethod, "gap")
+        elseif strcmpi(KselectionMethod, "gap")
             % Gap statistic
             n_tests = 5;
             KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
             [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
-            SSEs = [];
-        elseif strcmp(KselectionMethod, "both")
+        elseif strcmpi(KselectionMethod, "both")
+            % Calculate both SSE and gaps but use K of maximum gaps
             n_tests = 5;
             KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
             [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
             [~, SSEs] = elbow_method(pcaData, KmeansOpts);
+        elseif strcmpi(KselectionMethod, "preview")
+            % Preview 3-D PCA space and use a user-specified K
+            Fig = figure;
+            set(Fig, "outerposition", get(0, "screensize"));
+
+            try
+                plot3(pcaData(:, 1), pcaData(:, 2), pcaData(:, 3), 'k.', 'MarkerSize', 12, 'DisplayName', 'Raw PCA data');
+                legend;
+                title('Preview 3-D PCA data');
+                xlabel('PC-1'); ylabel('PC-2'); zlabel('PC-3');
+            catch
+                warning('PCA dimensions < 3. Please check your data and waveform length.');
+            end
+
+            K = input('Input a K value for K-means: ');
+            close(Fig);
         end
 
     end
@@ -88,6 +108,7 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
         K = 1;
     end
 
+    disp('Performing K-means on PCA data ...');
     % default: use mKmeans
     % [idx, C, ~] = mKmeans(pcaData, K, KmeansOpts);
     % MATLAB - kmeans
