@@ -65,48 +65,60 @@ function sortResult = mysort(data, channels, thOpt, K)
     %% Sort
     if strcmp(thOpt, "reselect")
         %% Reselect Th for Spike and Waveform Extraction
-        t = 0:1 / fs:min([100, (length(waves) - 1) * fs]); % show at most 100 sec wave
+        t = 0:1 / fs:min([100, (size(waves, 2) - 1) * fs]); % show at most 100 sec wave
         figure;
 
-        for index = 1:length(channels)
-            plot(t, waves(index, 1:length(t)), 'b'); drawnow;
+        for cIndex = 1:length(channels)
+            plot(t, waves(cIndex, 1:length(t)), 'b'); drawnow;
             xlim([0 30]); % show 30 sec
             xlabel('Time (sec)');
             ylabel('Voltage (V)');
-            title(['Channel ', num2str(channels(index))]);
-            sortOpts.th(index) = input(['Input th for channel ', num2str(channels(index)), ' (unit: V): ']);
+            title(['Channel ', num2str(channels(cIndex))]);
+            sortOpts.th(cIndex) = input(['Input th for channel ', num2str(channels(cIndex)), ' (unit: V): ']);
         end
 
         sortResult = batchSorting(waves, channels, sortOpts);
     elseif strcmp(thOpt, "origin-reshape")
         %% Use Original Spikes for Waveform Extraction by user-specified wave length
-        % TODO: Waveform reshape for multiple channels
-        t = (0:length(waves) - 1) / fs;
+        t = (0:size(waves, 2) - 1) / fs;
         spikeTimeAll = data.snips.eNeu.ts; % sec
-        Waveforms = zeros(size(spikeTimeAll, 1), length(1 - floor(sortOpts.waveLength / 2 * fs):floor(sortOpts.waveLength / 2 * fs)));
+        channels = data.snips.eNeu.chan;
+        Waveforms = zeros(length(spikeTimeAll), length(1 - floor(sortOpts.waveLength / 2 * fs):floor(sortOpts.waveLength / 2 * fs)));
         disp('Extracting Waveforms...');
 
         for sIndex = 1:length(spikeTimeAll)
             spikeTimeIndex = roundn(spikeTimeAll(sIndex) * fs, 0) - 1;
 
             if spikeTimeIndex - floor(sortOpts.waveLength / 2 * fs) > 0 && spikeTimeIndex + floor(sortOpts.waveLength / 2 * fs) <= length(t)
-                Waveforms(sIndex, :) = waves(spikeTimeIndex - floor(sortOpts.waveLength / 2 * fs) + 1:spikeTimeIndex + floor(sortOpts.waveLength / 2 * fs));
+                Waveforms(sIndex, :) = waves(channels(sIndex), spikeTimeIndex - floor(sortOpts.waveLength / 2 * fs) + 1:spikeTimeIndex + floor(sortOpts.waveLength / 2 * fs));
+            else
+                channels(sIndex) = 0;
             end
 
         end
 
+        Waveforms(channels == 0) = [];
         Waveforms = Waveforms * sortOpts.scaleFactor;
+        spikeTimeAll(channels == 0) = [];
+        channels(channels == 0) = [];
         disp('Waveforms extraction done.');
-        channels = data.snips.eNeu.chan;
         sortResult = batchSorting([], channels, sortOpts, Waveforms);
-        sortResult.spikeTimeAll = spikeTimeAll;
+
+        for cIndex = 1:length(sortResult)
+            sortResult(cIndex).spikeTimeAll = spikeTimeAll(channels == sortResult(cIndex).chanIdx);
+        end
+
     elseif strcmp(thOpt, "origin")
         %% Use Original Spike Waveforms of data
-        % TODO: Waveform specification for multiple channels
         Waveforms = data.snips.eNeu.data * sortOpts.scaleFactor;
         channels = data.snips.eNeu.chan;
+        spikeTimeAll = data.snips.eNeu.ts;
         sortResult = batchSorting([], channels, sortOpts, Waveforms);
-        sortResult.spikeTimeAll = data.snips.eNeu.ts;
+
+        for cIndex = 1:length(sortResult)
+            sortResult(cIndex).spikeTimeAll = spikeTimeAll(channels == sortResult(cIndex).chanIdx);
+        end
+
     else
         sortResult = [];
         warning('thOpt invalid!');

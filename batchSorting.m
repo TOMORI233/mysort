@@ -111,7 +111,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
                     % Exclude possible artifacts
                     if spikes(sIndex) <= meanSpike + 3 * stdSpike
-                        WaveformsTemp(sIndex) = wave(spikeIndexAll(sIndex) - floor(waveLength / 2 * fs) + 1:spikeIndexAll(sIndex) + floor(waveLength / 2 * fs));
+                        WaveformsTemp(sIndex, :) = wave(spikeIndexAll(sIndex) - floor(waveLength / 2 * fs) + 1:spikeIndexAll(sIndex) + floor(waveLength / 2 * fs));
                         mChannelsTemp(sIndex) = channels(eIndex);
                         spikeIndexTemp(sIndex) = spikeIndexAll(sIndex);
                     end
