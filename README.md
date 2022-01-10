@@ -59,9 +59,14 @@ You can specify channels to sort with the second parameter of `mysort`. Usually 
 channels = [1, 2, 14, 20];
 sortResult = mysort(data, channels, "reselect"); % sort channel 1,2,14,20 only
 sortResult = mysort(data, [], "reselect"); % sort all 32 channels
+sortResult = mysort(data, channels, "origin-reshape"); % sort original spike waveforms
 ```
 
-4. A bug in TDT block mat data
+4. To view result, use:
 
-By using `TDT2mat` or `TDTbin2mat` , we can import data from TDT block. But it usually contains only one channel of spike data in `snips.eNeu` . **Thus, only `reselect` mode is available for multi-channel sorting at present.**
+```matlab
+plotSSEorGap(sortResult); % select an optimum K
+plotPCA(sortResult, [1, 2, 3]); % view clusters in PCA 3-D space
+plotWave(sortResult); % view waves of different clusters
+```
 

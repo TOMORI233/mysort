@@ -97,7 +97,7 @@ function sortResult = mysort(data, channels, thOpt, K)
 
         end
 
-        Waveforms(channels == 0) = [];
+        Waveforms(channels == 0, :) = [];
         Waveforms = Waveforms * sortOpts.scaleFactor;
         spikeTimeAll(channels == 0) = [];
         channels(channels == 0) = [];

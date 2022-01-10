@@ -96,12 +96,12 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
             meanSpike = mean(spikes);
             stdSpike = std(spikes);
-            
+
             % For this channel
             nWaveLength = length(1 - floor(sortOpts.waveLength / 2 * fs):floor(sortOpts.waveLength / 2 * fs));
-            WaveformsTemp = zeros(size(spikes, 1), nWaveLength);
-            mChannelsTemp = zeros(size(spikes, 1), 1);
-            spikeIndexTemp = zeros(size(spikes, 1), 1);
+            WaveformsTemp = zeros(length(spikes), nWaveLength);
+            mChannelsTemp = zeros(length(spikes), 1);
+            spikeIndexTemp = zeros(length(spikes), 1);
             disp('Extracting Waveforms...');
 
             for sIndex = 1:length(spikes)

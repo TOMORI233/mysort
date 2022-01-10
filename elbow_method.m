@@ -15,8 +15,8 @@ function [K, SSEs] = elbow_method(Data, KmeansOpts)
 
     for index = 1:length(KmeansOpts.KArray)
         % MATLAB - kmeans
-        % [~, ~, sumd] = kmeans(Data, KmeansOpts.KArray(index), 'MaxIter', 50, 'Distance', 'sqeuclidean', 'Replicates', 5, 'Options', statset('Display', 'final'));
-        [~, ~, sumd] = mKmeans(Data, KmeansOpts.KArray(index), KmeansOpts);
+        [~, ~, sumd] = kmeans(Data, KmeansOpts.KArray(index), 'MaxIter', 50, 'Distance', 'sqeuclidean', 'Replicates', 2);
+        % [~, ~, sumd] = mKmeans(Data, KmeansOpts.KArray(index), KmeansOpts);
         SSEs = [SSEs; sum(sumd)];
     end
 
