@@ -81,16 +81,16 @@ function sortResult = mysort(data, channels, thOpt, K)
     elseif strcmp(thOpt, "origin-reshape")
         %% Use Original Spikes for Waveform Extraction by user-specified wave length
         % TODO: Waveform reshape for multiple channels
-        Waveforms = [];
         t = (0:length(waves) - 1) / fs;
         spikeTimeAll = data.snips.eNeu.ts; % sec
+        Waveforms = zeros(size(spikeTimeAll, 1), length(1 - floor(sortOpts.waveLength / 2 * fs):floor(sortOpts.waveLength / 2 * fs)));
         disp('Extracting Waveforms...');
 
         for sIndex = 1:length(spikeTimeAll)
             spikeTimeIndex = roundn(spikeTimeAll(sIndex) * fs, 0) - 1;
 
             if spikeTimeIndex - floor(sortOpts.waveLength / 2 * fs) > 0 && spikeTimeIndex + floor(sortOpts.waveLength / 2 * fs) <= length(t)
-                Waveforms = [Waveforms; waves(spikeTimeIndex - floor(sortOpts.waveLength / 2 * fs) + 1:spikeTimeIndex + floor(sortOpts.waveLength / 2 * fs))];
+                Waveforms(sIndex, :) = waves(spikeTimeIndex - floor(sortOpts.waveLength / 2 * fs) + 1:spikeTimeIndex + floor(sortOpts.waveLength / 2 * fs));
             end
 
         end

@@ -94,10 +94,10 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
     [idx, C, ~] = kmeans(pcaData, K, 'MaxIter', KmeansOpts.maxIteration, 'Distance', 'sqeuclidean', 'Replicates', KmeansOpts.maxRepeat, 'Options', statset('Display', 'final'));
 
     % Exclude noise
-    distance = [];
+    distance = zeros(size(pcaData, 1), 1);
 
     for index = 1:size(pcaData, 1)
-        distance = [distance; norm(pcaData(index, :) - C(idx(index), :))];
+        distance(index) = norm(pcaData(index, :) - C(idx(index), :));
     end
 
     meanDist = mean(distance);

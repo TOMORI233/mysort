@@ -96,7 +96,12 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
             meanSpike = mean(spikes);
             stdSpike = std(spikes);
-            spikeIndexTemp = [];
+            
+            % For this channel
+            nWaveLength = length(1 - floor(sortOpts.waveLength / 2 * fs):floor(sortOpts.waveLength / 2 * fs));
+            WaveformsTemp = zeros(size(spikes, 1), nWaveLength);
+            mChannelsTemp = zeros(size(spikes, 1), 1);
+            spikeIndexTemp = zeros(size(spikes, 1), 1);
             disp('Extracting Waveforms...');
 
             for sIndex = 1:length(spikes)
@@ -106,9 +111,9 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
                     % Exclude possible artifacts
                     if spikes(sIndex) <= meanSpike + 3 * stdSpike
-                        Waveforms = [Waveforms; wave(spikeIndexAll(sIndex) - floor(waveLength / 2 * fs) + 1:spikeIndexAll(sIndex) + floor(waveLength / 2 * fs))];
-                        mChannels = [mChannels; channels(eIndex)];
-                        spikeIndexTemp = [spikeIndexTemp; spikeIndexAll(sIndex)];
+                        WaveformsTemp(sIndex) = wave(spikeIndexAll(sIndex) - floor(waveLength / 2 * fs) + 1:spikeIndexAll(sIndex) + floor(waveLength / 2 * fs));
+                        mChannelsTemp(sIndex) = channels(eIndex);
+                        spikeIndexTemp(sIndex) = spikeIndexAll(sIndex);
                     end
 
                 end
@@ -116,6 +121,11 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
             end
 
             disp(['Channel ', num2str(channels(eIndex)), ' done. nSpikes = ', num2str(length(spikes))]);
+            WaveformsTemp(mChannelsTemp == 0, :) = [];
+            spikeIndexTemp(mChannelsTemp == 0) = [];
+            mChannelsTemp(mChannelsTemp == 0) = [];
+            Waveforms = [Waveforms; WaveformsTemp];
+            mChannels = [mChannels; mChannelsTemp];
             spikeIndex = [spikeIndex; {spikeIndexTemp}];
 
             % Scale
@@ -128,7 +138,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     end
 
     %% Batch Sorting
-    channelUnique = unique(mChannels);
+    channelUnique = unique(mChannels); % ascend
 
     if isempty(channelUnique)
         error('No channels specified');
