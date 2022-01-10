@@ -47,9 +47,9 @@ function sortResult = mysort(data, channels, thOpt, KorMethod)
         thOpt = "reselect";
     elseif nargin == 4
         
-        if isa(class(KorMethod), 'double')
+        if isa(KorMethod, 'double')
             KmeansOpts.K = KorMethod;
-        elseif isa(class(KorMethod), 'string') || isa(class(KorMethod), 'char')
+        elseif isa(KorMethod, 'string') || isa(KorMethod, 'char')
             KselectionMethod = KorMethod;
         else
             error('参数KorMethod类型错误');
