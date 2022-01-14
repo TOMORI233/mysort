@@ -24,7 +24,8 @@ function plotWave(result, N, visibilityOpt, saveFlag)
 
         if ~isempty(result(eIndex).clusterIdx)
             Fig = figure;
-            set(Fig, "outerposition", get(0, "screensize"));
+            % set(Fig, "outerposition", get(0, "screensize"));
+            maximizeFig(Fig);
             set(Fig, "Visible", visibilityOpt);
 
             plotCol = 2;

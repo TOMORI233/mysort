@@ -136,8 +136,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod)
         end
 
     else
-        sortResult = [];
-        warning('thOpt invalid!');
+        error('thOpt invalid!');
     end
 
     return;

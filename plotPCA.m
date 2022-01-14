@@ -29,7 +29,8 @@ function plotPCA(result, PCShown, visibilityOpt, saveFlag)
 
     for eIndex = 1:length(result)
         Fig = figure;
-        set(Fig, "outerposition", get(0, "screensize"));
+        % set(Fig, "outerposition", get(0, "screensize"));
+        maximizeFig(Fig);
         set(Fig, "Visible", visibilityOpt);
 
         for index = 1:result(eIndex).K
@@ -68,7 +69,7 @@ function plotPCA(result, PCShown, visibilityOpt, saveFlag)
         % plot(result(eIndex).pcaData(:, PCx), result(eIndex).pcaData(:, PCy), 'k.', 'MarkerSize', 12, 'DisplayName', 'Origin');
 
         legend;
-        title(['Channel: ' num2str(result(eIndex).chanIdx)]);
+        title(['Channel: ', num2str(result(eIndex).chanIdx), ' | nSamples = ', num2str(size(result(eIndex).wave, 1))]);
         xlabel(['PC-' num2str(PCx)]);
         ylabel(['PC-' num2str(PCy)]);
 

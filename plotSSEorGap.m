@@ -17,7 +17,8 @@ function plotSSEorGap(result, visibilityOpt, saveFlag)
 
     for eIndex = 1:length(result)
         Fig = figure;
-        set(Fig, "outerposition", get(0, "screensize"));
+        % set(Fig, "outerposition", get(0, "screensize"));
+        maximizeFig(Fig);
         set(Fig, "Visible", visibilityOpt);
 
         x = min([size(result(eIndex).pcaData, 1) min(result(eIndex).KArray)]):min([size(result(eIndex).pcaData, 1) max(result(eIndex).KArray)]);
@@ -31,7 +32,13 @@ function plotSSEorGap(result, visibilityOpt, saveFlag)
             plot(x, result(eIndex).SSEs, 'r-o', 'LineWidth', 2, 'DisplayName', 'SSE');
             ylabel('Sum of SSE');
         catch
-            warning('SSEs or gaps data missing, check if K is specified by user or KselectionMethod is not "both"');
+
+            if isempty(result(eIndex).gaps) && isempty(result(eIndex).SSEs)
+                warning('K is user-specified for sorting this channel');
+                close(Fig);
+                continue;
+            end
+            
         end
 
         legend;
