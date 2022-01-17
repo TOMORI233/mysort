@@ -1,5 +1,38 @@
 # README
 
+### Introduction
+
+`mysort` is for TDT Block data in .mat format. It should contain at least fields named `streams` or `snips`. `streams` should contain fields named `Wave`, which contains fields `data` (a $m\times n$ matrix of entire recorded waves, channels along row), `fs` (sampling rate, in Hz) and `channel` (a $m\times1$ vector specifying channel numbers). `snips` should contain fields named `data` (a $m\times p$ matrix of waveforms of spikes, waveform channel number along row and waveform points along column), `fs`, `chan` (a $m\times1$ vector specifying channel number of each waveform).
+
+`batchSorting` is for waves or waveforms from any recording platform. For multi-channel data, it runs in loops of sorting every single channel, considering channels to be independent.
+
+```matlab
+% sortOpts (default)
+sortOpts.th = 1e-5 * ones(1, size(waves, 1));
+sortOpts.fs = 12207.03;
+sortOpts.waveLength = 1.5e-3;
+sortOpts.scaleFactor = 1e6;
+sortOpts.CVCRThreshold = 0.9;
+sortOpts.KselectionMethod = "gap";
+KmeansOpts.KArray = 1:10;
+KmeansOpts.maxIteration = 100;
+KmeansOpts.maxRepeat = 3;
+KmeansOpts.plotIterationNum = 0;
+sortOpts.KmeansOpts = KmeansOpts;
+
+% 1. Use raw wave data
+% waves is an m×n matrix, with channels along row and sampling points along column
+% channels is an m×1 column vector, which specifies the channel number of each wave sample
+result = batchSorting(waves, channels, sortOpts);
+
+% 2. Use extracted waveforms
+% Waveforms is an m×n matrix, with channels along row and waveform points along column
+% channels is an m×1 column vector, which specifies the channel number of each waveform
+result = batchSorting([], channels, sortOpts, Waveforms);
+```
+
+
+
 ### Instructions
 
 1. To add `mysort` to your MATLAB path, in MATLAB command line type in

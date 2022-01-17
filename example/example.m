@@ -9,7 +9,7 @@ load('example.mat'); % TDT Block
 % sortResult = mysort(data, [], "origin", "preview");
 % sortResult = mysort(data, [], "origin-reshape", "preview");
 % sortResult = mysort(data, [], "origin-reshape", 2);
-sortResult = mysort(data, [], "reselect", 2);
+sortResult = mysort(data, [], "reselect", "preview");
 
 %% Plot
 plotSSEorGap(sortResult);

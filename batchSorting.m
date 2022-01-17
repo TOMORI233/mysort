@@ -41,11 +41,11 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     %     % 1. Use raw wave data
     %     % waves is an m×n matrix, with channels along row and sampling points along column
     %     % channels is an m×1 column vector, which specifies the channel number of each wave sample
-    %     result = sortMultiChannel(waves, channels, sortOpts);
+    %     result = batchSorting(waves, channels, sortOpts);
     %     % 2. Use extracted waveforms
     %     % Waveforms is an m×n matrix, with channels along row and waveform points along column
     %     % channels is an m×1 column vector, which specifies the channel number of each waveform
-    %     result = sortMultiChannel([], channels, sortOpts, Waveforms);
+    %     result = batchSorting([], channels, sortOpts, Waveforms);
 
     narginchk(1, 4);
 

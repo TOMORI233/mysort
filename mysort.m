@@ -1,8 +1,8 @@
 function sortResult = mysort(data, channels, thOpt, KorMethod)
-    % Description: sort single channel for TDT Block data in .mat format
+    % Description: sorting for TDT Block data in .mat format
     % Input:
     %     data: TDT Block data, specified as a struct
-    %           It should at least contain streams.Wave
+    %           It should at least contain streams.Wave or snips.eNeu
     %     channels: channels to sort, specified as a vector of channel numbers.
     %               If left empty, all channels of Wave will be sorted. (default: [])
     %     thOpt: "origin" | "origin-reshape" | "reselect"(default)
@@ -34,6 +34,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod)
     %     sortResult = mysort(data, [], "origin"); % use spike waveforms of input data and an optimum K
     %     sortResult = mysort(data, [], "origin-reshape"); % use spikes of input data but reshape each spike waveform with user-specified wave length
     %     sortResult = mysort(data, [], "reselect", 3); % reselect th for spikes and specify K as 3
+    %     sortResult = mysort(data, [], "reselect", "preview"); % preview the 3-D PCA data and input a K
     %     spikes = sortResult.spikeTimeAll(sortResult.clusterIdx == 1); % spike times of cluster 1
 
     narginchk(1, 4);

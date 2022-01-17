@@ -99,7 +99,11 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
             end
 
             K = input('Input a K value for K-means: ');
-            close(Fig);
+
+            try
+                close(Fig);
+            end
+
         end
 
     end
