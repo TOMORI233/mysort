@@ -23,6 +23,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod)
     %                 - th: threshold for spike extraction (if thOpts is "reselect")
     %                 - spikeTimeAll: spike time of raw wave data (if used), noise included. (unit: sec)
     %                 - clusterIdx: cluster index of each spike waveform sample, with 0 as noise
+    %                 - noiseClusterIdx: cluster index of each noise waveform sample, with 0 as non-noise
     %                 - K: optimum K used in K-means
     %                 - KArray: possible K values
     %                 - SSEs: elbow method result

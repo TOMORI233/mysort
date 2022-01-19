@@ -1,4 +1,4 @@
-function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshold, KselectionMethod, KmeansOpts)
+function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CVCRThreshold, KselectionMethod, KmeansOpts)
     % Description: use PCA and K-means for single channel spike sorting
     % Input:
     %     Waveforms: samples along row, each column represents a feature
@@ -21,6 +21,7 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
     %     K: optimum K value for K-means
     %     pcaData: SCORE of PCA result
     %     C: cluster centers
+    %     noiseIdx: cluster index of each noise sample, with 0 as non-noise
 
     narginchk(1, 4);
 
@@ -136,8 +137,9 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
     % MATLAB - kmeans
     [idx, C, ~] = kmeans(pcaData, K, 'MaxIter', KmeansOpts.maxIteration, 'Distance', 'sqeuclidean', 'Replicates', KmeansOpts.maxRepeat, 'Options', statset('Display', 'final'));
 
-    % Exclude noise
+    % Possible noise of each cluster
     distance = zeros(size(pcaData, 1), 1);
+    noiseIdx = idx;
 
     for index = 1:size(pcaData, 1)
         distance(index) = norm(pcaData(index, :) - C(idx(index), :));
@@ -146,6 +148,7 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
     meanDist = mean(distance);
     stdDist = std(distance);
     idx(distance > meanDist + 3 * stdDist) = 0;
+    noiseIdx(distance <= meanDist + 3 * stdDist) = 0;
 
     return;
 end

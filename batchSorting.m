@@ -31,6 +31,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     %             - wave: spike waveforms of this channel(electrode), samples along row
     %             - spikeTimeAll: spike time of raw wave data (if used), noise included
     %             - clusterIdx: cluster index of each spike waveform sample, with 0 as noise
+    %             - noiseClusterIdx: cluster index of each noise waveform sample, with 0 as non-noise
     %             - K: optimum K used in K-means
     %             - KArray: possible K values
     %             - SSEs: elbow method result
@@ -167,9 +168,10 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         end
 
         % Perform single channel sorting
-        [clusterIdx, SSEs, gaps, optimumK, pcaData, clusterCenter] = spikeSorting(data, CVCRThreshold, KselectionMethod, KmeansOpts);
+        [clusterIdx, SSEs, gaps, optimumK, pcaData, clusterCenter, noiseClusterIdx] = spikeSorting(data, CVCRThreshold, KselectionMethod, KmeansOpts);
 
         result(eIndex).clusterIdx = clusterIdx;
+        result(eIndex).noiseClusterIdx = noiseClusterIdx;
         result(eIndex).K = optimumK;
         result(eIndex).KArray = KmeansOpts.KArray;
         result(eIndex).SSEs = SSEs;
