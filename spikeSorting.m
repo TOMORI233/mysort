@@ -68,7 +68,7 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
         disp('Using user-speciified K for clustering.');
         K = KmeansOpts.K;
     else
-        disp('Searching for an optimum K for clustering ...');
+        disp('Searching for an optimum K for clustering...');
 
         if strcmpi(KselectionMethod, "elbow")
             % elbow method
@@ -98,7 +98,25 @@ function [idx, SSEs, gaps, K, pcaData, C] = spikeSorting(Waveforms, CVCRThreshol
                 warning('PCA dimensions < 3. Please check your data and waveform length.');
             end
 
-            K = input('Input a K value for K-means: ');
+            while 1
+                K = input('Input a K value for K-means (zero for auto-searching): ');
+
+                if K == 0
+                    % Gap statistic
+                    disp('Using gap statistic...');
+                    n_tests = 5;
+                    KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
+                    [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
+                    break;
+                end
+
+                if isa(K, "double") && K == fix(K) && K > 0
+                    break;
+                else
+                    warning('Please input a positive integer');
+                end
+
+            end
 
             try
                 close(Fig);
