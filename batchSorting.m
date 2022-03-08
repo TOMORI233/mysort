@@ -89,7 +89,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         %% Waveforms Extraction
         % For each channel
         for eIndex = 1:length(channels)
-            wave = waves(eIndex, :);
+            wave = waves(channels(eIndex), :);
             disp('Extracting spikes...');
             [spikes, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(eIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
 

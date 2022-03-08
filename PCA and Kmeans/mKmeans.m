@@ -108,7 +108,7 @@ function [idx, C, sumd] = mKmeans(pcaData, K, KmeansOpts)
         sumd = 0;
 
         for kIndex = 1:K
-            sumd = sumd + norm(pcaData(idx == kIndex, :) - C(kIndex, :))^2;
+            sumd = sumd + norm(pcaData(idx == kIndex, :) - C(kIndex, :)) ^ 2;
         end
 
         % display msg
