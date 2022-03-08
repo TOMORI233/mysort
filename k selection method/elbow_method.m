@@ -11,16 +11,24 @@ function [K, SSEs] = elbow_method(Data, KmeansOpts)
     %     K: optimum K value for K-means
     %     SSEs: SSE array for K values appointed by KmeansOpts.KArray
 
-    SSEs = [];
+    SSEs = zeros(length(KmeansOpts.KArray), 1);
 
     for index = 1:length(KmeansOpts.KArray)
         % MATLAB - kmeans
-        [~, ~, sumd] = kmeans(Data, KmeansOpts.KArray(index), 'MaxIter', 50, 'Distance', 'sqeuclidean', 'Replicates', 2);
+        [~, ~, sumd] = kmeans(Data, KmeansOpts.KArray(index), 'MaxIter', 100, 'Distance', 'sqeuclidean', 'Replicates', 2);
         % [~, ~, sumd] = mKmeans(Data, KmeansOpts.KArray(index), KmeansOpts);
-        SSEs = [SSEs; sum(sumd)];
+        SSEs(index) = sum(sumd);
     end
 
-    K = 7;
+    Fig = figure;
+    plot(KmeansOpts.KArray, SSEs, 'b.-', 'MarkerSize', 10);
+    xlabel('K value');
+    ylabel('SSE');
+    K = input('Input a K value: ');
+
+    try
+        close(Fig);
+    end
 
     return;
 end

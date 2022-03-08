@@ -50,6 +50,8 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
     narginchk(1, 4);
 
+    addpath(genpath("..\mysort"));
+
     if nargin == 1 || (nargin > 1 && (isempty(channels) || isequal(channels, 0)))
         channels = (1:size(waves, 1))';
     end

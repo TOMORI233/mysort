@@ -40,6 +40,8 @@ function sortResult = mysort(data, channels, thOpt, KorMethod)
 
     narginchk(1, 4);
 
+    addpath(genpath("..\mysort"));
+
     KselectionMethod = "gap";
 
     if nargin == 1
@@ -63,8 +65,6 @@ function sortResult = mysort(data, channels, thOpt, KorMethod)
         channels = 1:size(data.streams.Wave.data, 1);
     end
 
-    addpath(genpath("Gap Statistic Algorithm\"));
-
     waves = data.streams.Wave.data(channels, :);
     fs = data.streams.Wave.fs; % Hz
 
@@ -83,16 +83,19 @@ function sortResult = mysort(data, channels, thOpt, KorMethod)
     %% Sort
     if strcmp(thOpt, "reselect")
         %% Reselect Th for Spike and Waveform Extraction
-        t = 0:1 / fs:min([100, (size(waves, 2) - 1) * fs]); % show at most 100 sec wave
-        figure;
+        t = 0:1 / fs:min([30, (size(waves, 2) - 1) * fs]); % show at most 30-sec wave
+        Fig = figure;
 
         for cIndex = 1:length(channels)
             plot(t, waves(cIndex, 1:length(t)), 'b'); drawnow;
-            xlim([0 30]); % show 30 sec
             xlabel('Time (sec)');
             ylabel('Voltage (V)');
             title(['Channel ', num2str(channels(cIndex))]);
             sortOpts.th(cIndex) = input(['Input th for channel ', num2str(channels(cIndex)), ' (unit: V): ']);
+        end
+
+        try
+            close(Fig);
         end
 
         sortResult = batchSorting(waves, channels, sortOpts);

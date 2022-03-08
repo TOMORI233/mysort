@@ -25,6 +25,8 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
 
     narginchk(1, 4);
 
+    addpath(genpath("..\mysort"));
+
     if nargin < 4
         KmeansOpts.KArray = 1:10;
         KmeansOpts.maxIteration = 100;
