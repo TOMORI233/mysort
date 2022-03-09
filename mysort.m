@@ -65,8 +65,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod)
         channels = 1:size(data.streams.Wave.data, 1);
     end
 
-    channels = sort(channels); % ascend
-    waves = data.streams.Wave.data(channels, :);
+    waves = data.streams.Wave.data;
     fs = data.streams.Wave.fs; % Hz
 
     %% Params Settings
@@ -88,7 +87,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod)
         Fig = figure;
 
         for cIndex = 1:length(channels)
-            plot(t, waves(cIndex, 1:length(t)), 'b'); drawnow;
+            plot(t, waves(channels(cIndex), 1:length(t)), 'b'); drawnow;
             xlabel('Time (sec)');
             ylabel('Voltage (V)');
             title(['Channel ', num2str(channels(cIndex))]);

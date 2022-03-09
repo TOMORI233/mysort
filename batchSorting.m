@@ -88,10 +88,10 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
         %% Waveforms Extraction
         % For each channel
-        for eIndex = 1:length(channels)
-            wave = waves(eIndex, :);
+        for cIndex = 1:length(channels)
+            wave = waves(channels(cIndex), :);
             disp('Extracting spikes...');
-            [spikes, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(eIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+            [spikes, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
 
             if isempty(spikes)
                 continue;
@@ -115,7 +115,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
                     % Exclude possible artifacts
                     if spikes(sIndex) <= meanSpike + 3 * stdSpike
                         WaveformsTemp(sIndex, :) = wave(spikeIndexAll(sIndex) - floor(waveLength / 2 * fs) + 1:spikeIndexAll(sIndex) + floor(waveLength / 2 * fs));
-                        mChannelsTemp(sIndex) = channels(eIndex);
+                        mChannelsTemp(sIndex) = channels(cIndex);
                         spikeIndexTemp(sIndex) = spikeIndexAll(sIndex);
                     end
 
@@ -123,7 +123,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
             end
 
-            disp(['Channel ', num2str(channels(eIndex)), ' done. nSpikes = ', num2str(length(spikes))]);
+            disp(['Channel ', num2str(channels(cIndex)), ' done. nSpikes = ', num2str(length(spikes))]);
             WaveformsTemp(mChannelsTemp == 0, :) = [];
             spikeIndexTemp(mChannelsTemp == 0) = [];
             mChannelsTemp(mChannelsTemp == 0) = [];
@@ -150,38 +150,38 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     disp('Sorting...');
 
     % For each channel
-    for eIndex = 1:length(channelUnique)
-        data = double(Waveforms(mChannels == channelUnique(eIndex), :));
+    for cIndex = 1:length(channelUnique)
+        data = double(Waveforms(mChannels == channelUnique(cIndex), :));
 
-        result(eIndex).chanIdx = channelUnique(eIndex);
+        result(cIndex).chanIdx = channelUnique(cIndex);
 
         if isempty(data)
             continue;
         end
 
-        result(eIndex).wave = data / scaleFactor;
+        result(cIndex).wave = data / scaleFactor;
 
         if isfield(sortOpts, "th")
-            result(eIndex).th = sortOpts.th;
+            result(cIndex).th = sortOpts.th;
         end
 
         if exist("spikeIndex", "var")
-            result(eIndex).spikeTimeAll = (spikeIndex{eIndex} - 1) / fs;
+            result(cIndex).spikeTimeAll = (spikeIndex{cIndex} - 1) / fs;
         end
 
         % Perform single channel sorting
         [clusterIdx, SSEs, gaps, optimumK, pcaData, clusterCenter, noiseClusterIdx] = spikeSorting(data, CVCRThreshold, KselectionMethod, KmeansOpts);
 
-        result(eIndex).clusterIdx = clusterIdx;
-        result(eIndex).noiseClusterIdx = noiseClusterIdx;
-        result(eIndex).K = optimumK;
-        result(eIndex).KArray = KmeansOpts.KArray;
-        result(eIndex).SSEs = SSEs;
-        result(eIndex).gaps = gaps;
-        result(eIndex).pcaData = pcaData;
-        result(eIndex).clusterCenter = clusterCenter;
+        result(cIndex).clusterIdx = clusterIdx;
+        result(cIndex).noiseClusterIdx = noiseClusterIdx;
+        result(cIndex).K = optimumK;
+        result(cIndex).KArray = KmeansOpts.KArray;
+        result(cIndex).SSEs = SSEs;
+        result(cIndex).gaps = gaps;
+        result(cIndex).pcaData = pcaData;
+        result(cIndex).clusterCenter = clusterCenter;
 
-        disp(['Channel ', num2str(channelUnique(eIndex)), ' sorting finished. nClusters = ', num2str(optimumK)]);
+        disp(['Channel ', num2str(channelUnique(cIndex)), ' sorting finished. nClusters = ', num2str(optimumK)]);
     end
 
     disp('Sorting done.')
