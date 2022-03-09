@@ -65,7 +65,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod)
         channels = 1:size(data.streams.Wave.data, 1);
     end
 
-    waves = data.streams.Wave.data(channels, :);
+    waves = data.streams.Wave.data;
     fs = data.streams.Wave.fs; % Hz
 
     %% Params Settings
