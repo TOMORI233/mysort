@@ -23,22 +23,21 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
     %     C: cluster centers
     %     noiseIdx: cluster index of each noise sample, with 0 as non-noise
 
+    warning on;
     narginchk(1, 4);
+    addpath(genpath(fileparts(mfilename('fullpath'))));
 
-    addpath(genpath("..\mysort"));
-
-    if nargin < 4
-        KmeansOpts.KArray = 1:10;
-        KmeansOpts.maxIteration = 100;
-        KmeansOpts.maxRepeat = 3;
-        KmeansOpts.plotIterationNum = 0;
+    if nargin < 2
+        CVCRThreshold = 0.9;
     end
 
-    if nargin == 1
-        CVCRThreshold = 0.9;
-        KselectionMethod = 'gap';
-    elseif nargin == 2
-        KselectionMethod = 'gap';
+    if nargin < 3
+        KselectionMethod = "gap";
+    end
+
+    if nargin < 4
+        run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
+        KmeansOpts = defaultSortOpts.KmeansOpts;
     end
 
     %% PCA
@@ -90,7 +89,8 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
         elseif strcmpi(KselectionMethod, "preview")
             % Preview 3-D PCA space and use a user-specified K
             Fig = figure;
-            set(Fig, "outerposition", get(0, "screensize"));
+            % set(Fig, "outerposition", get(0, "screensize"));
+            maximizeFig(Fig);
 
             try
                 plot3(pcaData(:, 1), pcaData(:, 2), pcaData(:, 3), 'k.', 'MarkerSize', 12, 'DisplayName', 'Raw PCA data');

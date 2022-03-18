@@ -48,9 +48,9 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     %     % channels is an m×1 column vector, which specifies the channel number of each waveform
     %     result = batchSorting([], channels, sortOpts, Waveforms);
 
+    warning on;
     narginchk(1, 4);
-
-    addpath(genpath("..\mysort"));
+    addpath(genpath(fileparts(mfilename('fullpath'))));
 
     if nargin == 1 || (nargin > 1 && (isempty(channels) || isequal(channels, 0)))
         channels = (1:size(waves, 1))';
@@ -58,17 +58,14 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
 
     % sortOpts initialization
     if nargin < 3
-        sortOpts.th = 1e-5 * ones(1, length(channels));
-        sortOpts.fs = 12207.03;
-        sortOpts.waveLength = 1.5e-3;
-        sortOpts.scaleFactor = 1e6;
-        sortOpts.CVCRThreshold = 0.9;
-        sortOpts.KselectionMethod = "gap";
-        KmeansOpts.KArray = 1:10;
-        KmeansOpts.maxIteration = 100;
-        KmeansOpts.maxRepeat = 3;
-        KmeansOpts.plotIterationNum = 0;
-        sortOpts.KmeansOpts = KmeansOpts;
+        run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
+        sortOpts.th = getOr(sortOpts, 'th', defaultSortOpts.th);
+        sortOpts.fs = getOr(sortOpts, 'fs', defaultSortOpts.fs);
+        sortOpts.waveLength = getOr(sortOpts, 'waveLength', defaultSortOpts.waveLength); % sec
+        sortOpts.scaleFactor = getOr(sortOpts, 'scaleFactor', defaultSortOpts.scaleFactor);
+        sortOpts.CVCRThreshold = getOr(sortOpts, 'CVCRThreshold', defaultSortOpts.CVCRThreshold);
+        sortOpts.KselectionMethod = getOr(sortOpts, 'KselectionMethod', defaultSortOpts.KselectionMethod);
+        sortOpts.KmeansOpts = getOr(sortOpts, 'KmeansOpts', defaultSortOpts.KmeansOpts);
     end
 
     scaleFactor = sortOpts.scaleFactor;
@@ -81,6 +78,10 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         fs = sortOpts.fs; % Hz
         waveLength = sortOpts.waveLength; % sec
 
+        if length(th) ~= length(channels)
+            error('Number of ths not matched with number of channels');
+        end
+
         % Waveforms: waveforms along row
         Waveforms = [];
         mChannels = []; % channel(electrode) number for each waveform
@@ -91,9 +92,18 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         for cIndex = 1:length(channels)
             wave = waves(channels(cIndex), :);
             disp('Extracting spikes...');
-            [spikes, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+            
+            try
+                waveGPU = gpuArray(wave);
+                [spikesGPU, spikeIndexAllGPU] = findpeaks(waveGPU, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+                [spikes, spikeIndexAll] = gather(spikesGPU, spikeIndexAllGPU);
+            catch
+                warning("GPU device unavailable. Using CPU...");
+                [spikes, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+            end
 
             if isempty(spikes)
+                warning(['No spikes detected in channel', num2str(channels(cIndex))]);
                 continue;
             end
 
