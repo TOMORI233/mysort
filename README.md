@@ -12,6 +12,8 @@ This sorting method is simply based on PCA and K-means.
 
 ```matlab
 % sortOpts (default)
+% addpath(genpath(fileparts(mfilename('fullpath'))));
+% run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
 sortOpts.th = 1e-5 * ones(1, size(waves, 1));
 sortOpts.fs = 12207.03;
 sortOpts.waveLength = 1.5e-3;
@@ -35,9 +37,9 @@ result = batchSorting(waves, channels, sortOpts);
 result = batchSorting([], channels, sortOpts, Waveforms);
 ```
 
-
-
 ### Instructions
+
+See `mysort.m` for more detailed information.
 
 1. To add `mysort` to your MATLAB path, in MATLAB command line type in
 
@@ -109,4 +111,3 @@ plotSSEorGap(sortResult); % select an optimum K
 plotPCA(sortResult, [1, 2, 3]); % view clusters in 3-D PCA space. Also you can specify the second parameter with  a 2-element vector, which will show clusters in 2-D PCA space.
 plotWave(sortResult); % view waves of different clusters
 ```
-

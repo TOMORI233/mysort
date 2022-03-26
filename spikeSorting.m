@@ -27,6 +27,9 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
     narginchk(1, 4);
     addpath(genpath(fileparts(mfilename('fullpath'))));
 
+    run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
+    defaultKmeansOpts = defaultSortOpts.KmeansOpts;
+
     if nargin < 2
         CVCRThreshold = 0.9;
     end
@@ -36,8 +39,12 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
     end
 
     if nargin < 4
-        run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
-        KmeansOpts = defaultSortOpts.KmeansOpts;
+        KmeansOpts = defaultKmeansOpts;
+    else
+        KmeansOpts.KArray = getOr(KmeansOpts, "KArray", defaultKmeansOpts.KArray);
+        KmeansOpts.maxIteration = getOr(KmeansOpts, "maxIteration", defaultKmeansOpts.maxIteration);
+        KmeansOpts.maxRepeat = getOr(KmeansOpts, "maxRepeat", defaultKmeansOpts.maxRepeat);
+        KmeansOpts.plotIterationNum = getOr(KmeansOpts, "plotIterationNum", defaultKmeansOpts.plotIterationNum);
     end
 
     %% PCA
@@ -65,6 +72,7 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
     % Find an optimum K for K-means
     SSEs = [];
     gaps = [];
+    n_tests = 5;
 
     if isfield(KmeansOpts, "K") && ~isempty(KmeansOpts.K)
         disp('Using user-speciified K for clustering.');
@@ -77,12 +85,10 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
             [K, SSEs] = elbow_method(pcaData, KmeansOpts);
         elseif strcmpi(KselectionMethod, "gap")
             % Gap statistic
-            n_tests = 5;
             KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
             [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
         elseif strcmpi(KselectionMethod, "both")
             % Calculate both SSE and gaps but use K of maximum gaps
-            n_tests = 5;
             KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
             [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
             [~, SSEs] = elbow_method(pcaData, KmeansOpts);
@@ -101,24 +107,16 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
                 warning('PCA dimensions < 3. Please check your data and waveform length.');
             end
 
-            while 1
-                K = input('Input a K value for K-means (zero for auto-searching): ');
+            K = validateInput(["non-negative", "integer"], 'Input a K value for K-means (zero for auto-searching): ');
 
-                if K == 0
-                    % Gap statistic
-                    disp('Using gap statistic...');
-                    n_tests = 5;
-                    KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
-                    [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
-                    break;
-                end
-
-                if isa(K, "double") && K == fix(K) && K > 0
-                    break;
-                else
-                    warning('Please input a positive integer');
-                end
-
+            if K == 0
+                % elbow method
+                disp('Using elbow method...');
+                [K, SSEs] = elbow_method(pcaData, KmeansOpts);
+                % Gap statistic
+                % disp('Using gap statistic...');
+                % KmeansOpts.KArray = min([size(pcaData, 1), min(KmeansOpts.KArray)]):min([size(pcaData, 1), max(KmeansOpts.KArray)]);
+                % [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
             end
 
             try

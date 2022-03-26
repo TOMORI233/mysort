@@ -9,7 +9,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     %               If left empty or 0, all channels will be sorted.
     %     sortOpts: a sorting settings struct (if left empty, default settings will be used), containing:
     %               - th: threshold for spike extraction, in volts (default: 1e-5)
-    %               - fs: sampling rate, in Hz (default: 12207.03)
+    %               - fs: sampling rate, in Hz (default: 24414.0625)
     %               - waveLength: waveform length, in seconds (default: 1.5e-3)
     %               - scaleFactor: scale factor for waveforms (default: 1e+6)
     %               - CVCRThreshold: cumulative variance contribution rate threshold for principal components selection (default: 0.9)
@@ -19,16 +19,18 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     %                                   - "both": use gap statistic but also return SSE result of elbow method
     %                                   - "preview": plot 3-D PCA data and use an input K from user
     %               - KmeansOpts: kmeans settings, a struct containing:
-    %                                   - KArray: possible K values for K-means (default: 1:10)
-    %                                   - maxIteration: maximum number of iterations (default: 100)
-    %                                   - maxRepeat: maximum number of times to repeat kmeans (default: 3)
-    %                                   - plotIterationNum: number of iterations to plot (default: 0)
-    %                                   - K: user-specified K. If left empty, an optimum K will be calculated and used (default: [])
+    %                             - KArray: possible K values for K-means (default: 1:10)
+    %                             - maxIteration: maximum number of iterations (default: 100)
+    %                             - maxRepeat: maximum number of times to repeat kmeans (default: 3)
+    %                             - plotIterationNum: number of iterations to plot (default: 0)
+    %                             - K: user-specified K. If left empty, an optimum K will be calculated and used (default: [])
     %     Waveforms: waveforms of spikes, from spikeTime - waveLength/2 to spikeTime + waveLength/2, channels along row
     % Output:
     %     result: a struct array, each element of which is a result of one channel(electrode), containing fields:
     %             - chanIdx: channel(electrode) number
     %             - wave: spike waveforms of this channel(electrode), samples along row
+    %             - fs: sampling rate, in Hz
+    %             - sortOpts: sort settings
     %             - spikeTimeAll: spike time of raw wave data (if used), noise included
     %             - clusterIdx: cluster index of each spike waveform sample, with 0 as noise
     %             - noiseClusterIdx: cluster index of each noise waveform sample, with 0 as non-noise
@@ -52,26 +54,38 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     narginchk(1, 4);
     addpath(genpath(fileparts(mfilename('fullpath'))));
 
+    run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
+    defaultKmeansOpts = defaultSortOpts.KmeansOpts;
+
     if nargin == 1 || (nargin > 1 && (isempty(channels) || isequal(channels, 0)))
         channels = (1:size(waves, 1))';
     end
 
     % sortOpts initialization
     if nargin < 3
-        run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
-        sortOpts.th = getOr(sortOpts, 'th', defaultSortOpts.th);
-        sortOpts.fs = getOr(sortOpts, 'fs', defaultSortOpts.fs);
-        sortOpts.waveLength = getOr(sortOpts, 'waveLength', defaultSortOpts.waveLength); % sec
-        sortOpts.scaleFactor = getOr(sortOpts, 'scaleFactor', defaultSortOpts.scaleFactor);
-        sortOpts.CVCRThreshold = getOr(sortOpts, 'CVCRThreshold', defaultSortOpts.CVCRThreshold);
-        sortOpts.KselectionMethod = getOr(sortOpts, 'KselectionMethod', defaultSortOpts.KselectionMethod);
-        sortOpts.KmeansOpts = getOr(sortOpts, 'KmeansOpts', defaultSortOpts.KmeansOpts);
+        sortOpts = [];
+    end
+
+    sortOpts.th = getOr(sortOpts, 'th', defaultSortOpts.th);
+    sortOpts.fs = getOr(sortOpts, 'fs', defaultSortOpts.fs);
+    sortOpts.waveLength = getOr(sortOpts, 'waveLength', defaultSortOpts.waveLength); % sec
+    sortOpts.scaleFactor = getOr(sortOpts, 'scaleFactor', defaultSortOpts.scaleFactor);
+    sortOpts.CVCRThreshold = getOr(sortOpts, 'CVCRThreshold', defaultSortOpts.CVCRThreshold);
+    sortOpts.KselectionMethod = getOr(sortOpts, 'KselectionMethod', defaultSortOpts.KselectionMethod);
+    
+    if isfield(sortOpts, "KmeansOpts")
+        KmeansOpts.KArray = getOr(sortOpts.KmeansOpts, "KArray", defaultKmeansOpts.KArray);
+        KmeansOpts.maxIteration = getOr(sortOpts.KmeansOpts, "maxIteration", defaultKmeansOpts.maxIteration);
+        KmeansOpts.maxRepeat = getOr(sortOpts.KmeansOpts, "maxRepeat", defaultKmeansOpts.maxRepeat);
+        KmeansOpts.plotIterationNum = getOr(sortOpts.KmeansOpts, "plotIterationNum", defaultKmeansOpts.plotIterationNum);
+        KmeansOpts.K = getOr(sortOpts.KmeansOpts, "K", []);
+    else
+        KmeansOpts = defaultKmeansOpts;
     end
 
     scaleFactor = sortOpts.scaleFactor;
     CVCRThreshold = sortOpts.CVCRThreshold;
     KselectionMethod = sortOpts.KselectionMethod;
-    KmeansOpts = sortOpts.KmeansOpts;
 
     if nargin < 4
         th = sortOpts.th; % V
@@ -103,7 +117,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
             end
 
             if isempty(spikes)
-                warning(['No spikes detected in channel', num2str(channels(cIndex))]);
+                warning(['No spikes detected in channel ', num2str(channels(cIndex))]);
                 continue;
             end
 
@@ -170,6 +184,8 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         end
 
         result(cIndex).wave = data / scaleFactor;
+        result(cIndex).sortOpts = sortOpts;
+        result(cIndex).fs = fs;
 
         if isfield(sortOpts, "th")
             result(cIndex).th = sortOpts.th;
@@ -190,6 +206,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         result(cIndex).gaps = gaps;
         result(cIndex).pcaData = pcaData;
         result(cIndex).clusterCenter = clusterCenter;
+        result(cIndex).templates = genTemplates(result(cIndex));
 
         disp(['Channel ', num2str(channelUnique(cIndex)), ' sorting finished. nClusters = ', num2str(optimumK)]);
     end

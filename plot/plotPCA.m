@@ -21,7 +21,7 @@ function PCAFigs = plotPCA(result, PCShown, visibilityOpt, colors)
     end
 
     if nargin < 4
-        colors = {'r', 'g', 'b', 'c', 'm', 'y'};
+        colors = generateColorGrad(12, 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
     end
 
     PCx = PCShown(1);

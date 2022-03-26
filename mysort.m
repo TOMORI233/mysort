@@ -18,7 +18,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     %                                    - "preview": plot 3-D PCA data and use an input K from user
     %     sortOpts: a sorting settings struct (if left empty, default settings will be used), containing:
     %               - th: threshold for spike extraction, in volts (default: 1e-5)
-    %               - fs: sampling rate, in Hz (default: 12207.03)
+    %               - fs: sampling rate, in Hz (default: 24414.0625)
     %               - waveLength: waveform length, in seconds (default: 1.5e-3)
     %               - scaleFactor: scale factor for waveforms (default: 1e+6)
     %               - CVCRThreshold: cumulative variance contribution rate threshold for principal components selection (default: 0.9)
@@ -29,15 +29,17 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     %                                   - "preview": plot 3-D PCA data and use an input K from user
     %               - reselectT0: for reselect mode (thOpt), starting time (in sec) of preview wave. (default: 0)
     %               - KmeansOpts: kmeans settings, a struct containing:
-    %                                   - KArray: possible K values for K-means (default: 1:10)
-    %                                   - maxIteration: maximum number of iterations (default: 100)
-    %                                   - maxRepeat: maximum number of times to repeat kmeans (default: 3)
-    %                                   - plotIterationNum: number of iterations to plot (default: 0)
-    %                                   - K: user-specified K. If left empty, an optimum K will be calculated and used (default: [])
+    %                             - KArray: possible K values for K-means (default: 1:10)
+    %                             - maxIteration: maximum number of iterations (default: 100)
+    %                             - maxRepeat: maximum number of times to repeat kmeans (default: 3)
+    %                             - plotIterationNum: number of iterations to plot (default: 0)
+    %                             - K: user-specified K. If left empty, an optimum K will be calculated and used (default: [])
     % Output:
     %     sortResult: a struct array, each element of which is a result of one channel(electrode), containing fields:
     %                 - chanIdx: channel(electrode) number
     %                 - wave: spike waveforms of this channel(electrode), samples along row
+    %                 - fs: sampling rate, in Hz
+    %                 - sortOpts: sort settings
     %                 - th: threshold for spike extraction (if thOpts is "reselect")
     %                 - spikeTimeAll: spike time of raw wave data (if used), noise included. (unit: sec)
     %                 - clusterIdx: cluster index of each spike waveform sample, with 0 as noise
@@ -77,14 +79,6 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
         sortOpts = [];
     end
 
-    if isa(KorMethod, 'double') && KorMethod == fix(KorMethod)
-        KmeansOpts.K = KorMethod;
-    elseif isa(KorMethod, 'string') || isa(KorMethod, 'char')
-        sortOpts.KselectionMethod = KorMethod;
-    else
-        error('参数KorMethod类型错误');
-    end
-
     if isempty(channels)
         channels = 1:size(data.streams.Wave.data, 1);
     end
@@ -94,13 +88,34 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
 
     %% Params Settings
     run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
-    sortOpts.fs = getOr(sortOpts, 'fs', defaultSortOpts.fs);
+    defaultKmeansOpts = defaultSortOpts.KmeansOpts;
+
+    sortOpts.fs = getOr(sortOpts, 'fs', fs);
     sortOpts.waveLength = getOr(sortOpts, 'waveLength', defaultSortOpts.waveLength); % sec
     sortOpts.scaleFactor = getOr(sortOpts, 'scaleFactor', defaultSortOpts.scaleFactor);
     sortOpts.CVCRThreshold = getOr(sortOpts, 'CVCRThreshold', defaultSortOpts.CVCRThreshold);
     sortOpts.KselectionMethod = getOr(sortOpts, 'KselectionMethod', defaultSortOpts.KselectionMethod);
-    sortOpts.KmeansOpts = getOr(sortOpts, 'KmeansOpts', defaultSortOpts.KmeansOpts);
+    
+    if isfield(sortOpts, "KmeansOpts")
+        KmeansOpts.KArray = getOr(sortOpts.KmeansOpts, "KArray", defaultKmeansOpts.KArray);
+        KmeansOpts.maxIteration = getOr(sortOpts.KmeansOpts, "maxIteration", defaultKmeansOpts.maxIteration);
+        KmeansOpts.maxRepeat = getOr(sortOpts.KmeansOpts, "maxRepeat", defaultKmeansOpts.maxRepeat);
+        KmeansOpts.plotIterationNum = getOr(sortOpts.KmeansOpts, "plotIterationNum", defaultKmeansOpts.plotIterationNum);
+    else
+        KmeansOpts = defaultKmeansOpts;
+    end
+
     reselectT0 = getOr(sortOpts, 'reselectT0', defaultSortOpts.reselectT0); % sec
+
+    if isa(KorMethod, 'double') && KorMethod == fix(KorMethod)
+        KmeansOpts.K = KorMethod;
+    elseif isa(KorMethod, 'string') || isa(KorMethod, 'char')
+        sortOpts.KselectionMethod = KorMethod;
+    else
+        error('参数KorMethod类型错误');
+    end
+
+    sortOpts.KmeansOpts = KmeansOpts;
 
     %% Sort
     if strcmp(thOpt, "reselect")
@@ -108,13 +123,17 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
         t = reselectT0:1 / fs:(min([reselectT0 + 50, size(waves, 2) / fs])); % preview at most 50-sec wave
         Fig = figure;
 
-        for cIndex = 1:length(channels)
-            plot(t, waves(channels(cIndex), 1:length(t)), 'b'); drawnow;
-            xlabel('Time (sec)');
-            ylabel('Voltage (V)');
-            xlim([reselectT0, reselectT0 + 10]); % show 10-sec wave
-            title(['Channel ', num2str(channels(cIndex))]);
-            sortOpts.th(cIndex) = input(['Input th for channel ', num2str(channels(cIndex)), ' (unit: V): ']);
+        if ~isfield(sortOpts, "th") || isempty(sortOpts.th) % th does not exist
+
+            for cIndex = 1:length(channels)
+                plot(t, waves(channels(cIndex), 1:length(t)), 'b'); drawnow;
+                xlabel('Time (sec)');
+                ylabel('Voltage (V)');
+                xlim([reselectT0, reselectT0 + 10]); % show 10-sec wave
+                title(['Channel ', num2str(channels(cIndex))]);
+                sortOpts.th(cIndex) = validateInput("positive", ['Input th for channel ', num2str(channels(cIndex)), ' (unit: V): ']);
+            end
+            
         end
 
         try

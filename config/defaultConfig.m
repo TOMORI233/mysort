@@ -2,6 +2,9 @@
 % sample rate
 defaultSortOpts.fs = 24414.0625; % Hz
 
+% threshold
+defaultSortOpts.th = 1e-5; % V
+
 % wave length
 defaultSortOpts.waveLength = 1.5e-3; % ms
 

@@ -22,7 +22,7 @@ function [waveFigs, templateFigs] = plotWave(result, N, visibilityOpt, colors)
     end
         
     if nargin < 4
-        colors = {'r', 'g', 'b', 'c', 'm', 'y'};
+        colors = generateColorGrad(12, 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
     end
 
     for eIndex = 1:length(result)
@@ -35,12 +35,14 @@ function [waveFigs, templateFigs] = plotWave(result, N, visibilityOpt, colors)
 
             plotCol = 2;
 
+            result(eIndex).templates = getOr(result(eIndex), "templates", genTemplates(result(eIndex)));
+            templates = [mean(result(eIndex).wave(result(eIndex).clusterIdx == 0, :)); result(eIndex).templates];
+
             % Waveforms of each cluster
             for cIndex = 0:result(eIndex).K
                 plotData = result(eIndex).wave(result(eIndex).clusterIdx == cIndex, :);
 
                 if ~isempty(plotData)
-                    meanValue{cIndex + 1} = mean(plotData);
                     stdValue = std(plotData);
 
                     mSubplot(waveFigs, ceil((result(eIndex).K + 1) / plotCol), plotCol, cIndex + 1, [1, 1], [0.05, 0.05, 0.1, 0.1]);
@@ -61,10 +63,10 @@ function [waveFigs, templateFigs] = plotWave(result, N, visibilityOpt, colors)
                     end
 
                     if size(plotData, 1) > 1
-                        y1 = interp1(x, meanValue{cIndex + 1} + stdValue, xSmooth, 'cubic');
-                        y2 = interp1(x, meanValue{cIndex + 1} - stdValue, xSmooth, 'cubic');
+                        y1 = interp1(x, templates(cIndex + 1, :) + stdValue, xSmooth, 'cubic');
+                        y2 = interp1(x, templates(cIndex + 1, :) - stdValue, xSmooth, 'cubic');
                         fill([xSmooth fliplr(xSmooth)], [y1 fliplr(y2)], [230, 230, 230] / 255, 'edgealpha', '0', 'facealpha', '.6', 'DisplayName', 'Error bar');
-                        plot(xSmooth, interp1(x, meanValue{cIndex + 1}, xSmooth, 'cubic'), 'r', 'LineWidth', 2, 'DisplayName', 'Mean');
+                        plot(xSmooth, interp1(x, templates(cIndex + 1, :), xSmooth, 'cubic'), 'r', 'LineWidth', 2, 'DisplayName', 'Mean');
                     end
 
                     if cIndex > 0
@@ -75,7 +77,7 @@ function [waveFigs, templateFigs] = plotWave(result, N, visibilityOpt, colors)
                     end
 
                     legend;
-                    drawnow;
+                    % drawnow;
                 end
 
             end
@@ -84,12 +86,12 @@ function [waveFigs, templateFigs] = plotWave(result, N, visibilityOpt, colors)
             templateFigs(eIndex) = figure;
             maximizeFig(templateFigs);
             set(templateFigs, "Visible", visibilityOpt);
-            waveLen = size(meanValue{1}, 2);
+            waveLen = size(templates, 2);
             x = (1:waveLen) - floor(waveLen / 2);
             colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(result(eIndex).K / length(colors)) * length(colors), 1);
 
             for cIndex = 1:result(eIndex).K
-                plot(x, meanValue{cIndex + 1}, "Color", colorsAll{cIndex}, "LineWidth", 2, "DisplayName", ['cluster ', num2str(cIndex)]); hold on;
+                plot(x, templates(cIndex + 1, :), "Color", colorsAll{cIndex}, "LineWidth", 2, "DisplayName", ['cluster ', num2str(cIndex)]); hold on;
             end
 
             legend;
