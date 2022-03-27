@@ -104,10 +104,17 @@ sortResult = mysort(data, channels, "reselect", "both"); % use gap statistic but
 sortResult = mysort(data, channels, "reselect", "preview"); % preview 3-D PCA data and input a K
 ```
 
-5. To view result, use:
+5. For more detailed settings, specify your own `sortOpts`
+
+```matlab
+sortResult = mysort(..., sortOpts);
+```
+
+6. To view result, use:
 
 ```matlab
 plotSSEorGap(sortResult); % select an optimum K
 plotPCA(sortResult, [1, 2, 3]); % view clusters in 3-D PCA space. Also you can specify the second parameter with  a 2-element vector, which will show clusters in 2-D PCA space.
 plotWave(sortResult); % view waves of different clusters
+plotMSE(sortResult); % histogram of MSE of each template on each cluster
 ```
