@@ -38,7 +38,6 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     %     sortResult: a struct array, each element of which is a result of one channel(electrode), containing fields:
     %                 - chanIdx: channel(electrode) number
     %                 - wave: spike waveforms of this channel(electrode), samples along row
-    %                 - fs: sampling rate, in Hz
     %                 - sortOpts: sort settings
     %                 - th: threshold for spike extraction (if thOpts is "reselect")
     %                 - spikeTimeAll: spike time of raw wave data (if used), noise included. (unit: sec)
@@ -84,38 +83,26 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     end
 
     waves = data.streams.Wave.data;
-    fs = data.streams.Wave.fs; % Hz
 
     %% Params Settings
     run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
-    defaultKmeansOpts = defaultSortOpts.KmeansOpts;
+    sortOpts = getOrFull(sortOpts, defaultSortOpts);
+    sortOpts.KmeansOpts = getOrFull(sortOpts.KmeansOpts, defaultSortOpts.KmeansOpts);
 
-    sortOpts.fs = getOr(sortOpts, 'fs', fs);
-    sortOpts.waveLength = getOr(sortOpts, 'waveLength', defaultSortOpts.waveLength); % sec
-    sortOpts.scaleFactor = getOr(sortOpts, 'scaleFactor', defaultSortOpts.scaleFactor);
-    sortOpts.CVCRThreshold = getOr(sortOpts, 'CVCRThreshold', defaultSortOpts.CVCRThreshold);
-    sortOpts.KselectionMethod = getOr(sortOpts, 'KselectionMethod', defaultSortOpts.KselectionMethod);
-    
-    if isfield(sortOpts, "KmeansOpts")
-        KmeansOpts.KArray = getOr(sortOpts.KmeansOpts, "KArray", defaultKmeansOpts.KArray);
-        KmeansOpts.maxIteration = getOr(sortOpts.KmeansOpts, "maxIteration", defaultKmeansOpts.maxIteration);
-        KmeansOpts.maxRepeat = getOr(sortOpts.KmeansOpts, "maxRepeat", defaultKmeansOpts.maxRepeat);
-        KmeansOpts.plotIterationNum = getOr(sortOpts.KmeansOpts, "plotIterationNum", defaultKmeansOpts.plotIterationNum);
-    else
-        KmeansOpts = defaultKmeansOpts;
+    if ~isfield(sortOpts, "fs") || isempty(sortOpts.fs)
+        sortOpts.fs = data.streams.Wave.fs;
     end
 
+    fs = sortOpts.fs;
     reselectT0 = getOr(sortOpts, 'reselectT0', defaultSortOpts.reselectT0); % sec
 
     if isa(KorMethod, 'double') && KorMethod == fix(KorMethod)
-        KmeansOpts.K = KorMethod;
+        sortOpts.KmeansOpts.K = KorMethod;
     elseif isa(KorMethod, 'string') || isa(KorMethod, 'char')
         sortOpts.KselectionMethod = KorMethod;
     else
         error('参数KorMethod类型错误');
     end
-
-    sortOpts.KmeansOpts = KmeansOpts;
 
     %% Sort
     if strcmp(thOpt, "reselect")
@@ -123,7 +110,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
         t = reselectT0:1 / fs:(min([reselectT0 + 50, size(waves, 2) / fs])); % preview at most 50-sec wave
         Fig = figure;
 
-        if ~isfield(sortOpts, "th") || isempty(sortOpts.th) % th does not exist
+        if ~isfield(sortOpts, "th") || isempty(sortOpts.th) % th does not exist or is empty
 
             for cIndex = 1:length(channels)
                 plot(t, waves(channels(cIndex), 1:length(t)), 'b'); drawnow;

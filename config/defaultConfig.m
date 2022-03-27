@@ -1,9 +1,12 @@
-% default sortOpts
+%% default sortOpts
+
 % sample rate
-defaultSortOpts.fs = 24414.0625; % Hz
+% Default fs here has the highest priority. Please try not to specify fs here
+% defaultSortOpts.fs = 24414.0625; % Hz
 
 % threshold
-defaultSortOpts.th = 1e-5; % V
+% Default th has the highest priority. Please try not to specify th here
+% defaultSortOpts.th = 1e-5; % V
 
 % wave length
 defaultSortOpts.waveLength = 1.5e-3; % ms

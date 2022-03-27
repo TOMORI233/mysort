@@ -24,7 +24,7 @@ function [K, SSEs] = elbow_method(Data, KmeansOpts)
     plot(KmeansOpts.KArray, SSEs, 'b.-', 'MarkerSize', 10);
     xlabel('K value');
     ylabel('SSE');
-    K = input('Input a K value (positive integer): ');
+    K = validateInput(["positive", "integer"], 'Input a K value (positive integer): ', [1, 1]);
 
     try
         close(Fig);
