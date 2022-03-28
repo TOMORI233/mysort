@@ -4,8 +4,9 @@ function sortResult = templateMatching(data, sortResult0)
     %     Sort data0 with mysort to generate spike waveform templates and apply template matching to data1.
     %     The template matching algorithm is based on mean sqaure error (MSE).
     %     The basic principal is that the amplitude of spikes from the same cell follows a Gaussian normal distribution.
-    %     Thus, MSEs between a template and waveforms also follow a Gaussian normal distribution.
-    %     The confidence interval is [mean(MSE) - 3 * std(MSE), mean(MSE) + 3 * std(MSE)]
+    %     Thus, SSEs between a template and waveforms followa a chi-square distribution.
+    %     Using normalized PCA data for SSE calculation can better characterize similarity.
+    %     The confidence interval is [0, chi2inv(0.95, df)], where df is the number of principal components.
     % Input:
     %     data: TDT Block data, specified as a struct
     %           It should at least contain streams.Wave.data and streams.Wave.fs
@@ -17,7 +18,6 @@ function sortResult = templateMatching(data, sortResult0)
     %     sortResult = templateMatching(data1, sortResult0);
 
     addpath(genpath(fileparts(mfilename('fullpath'))));
-    wave = data.streams.Wave.data(1, :);
 
     %% Params Settings
     run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
@@ -31,16 +31,9 @@ function sortResult = templateMatching(data, sortResult0)
     fs = sortOpts.fs;
     CVCRThreshold = sortOpts.CVCRThreshold;
 
-    %% Generate Templates
-    if ~isfield(sortResult0, "templates") || isempty(sortResult0.templates)
-        templates = genTemplates(sortResult0);
-    else
-        templates = sortResult0.templates;
-    end
-
-    [tNum, tLen] = size(templates);
+    wave = data.streams.Wave.data(1, :);
+    [~, waveSize] = size(sortResult0.wave);
     th = sortResult0.th;
-    sortResult.templates = templates;
     sortResult.K = sortResult0.K;
     sortResult.sortOpts = sortOpts;
 
@@ -49,11 +42,11 @@ function sortResult = templateMatching(data, sortResult0)
             
     try
         waveGPU = gpuArray(wave);
-        [spikesGPU, spikeIndexAllGPU] = findpeaks(waveGPU, "MinPeakHeight", th, "MinPeakDistance", tLen / 2);
+        [spikesGPU, spikeIndexAllGPU] = findpeaks(waveGPU, "MinPeakHeight", th, "MinPeakDistance", waveSize / 2);
         [spikesAmp, spikeIndexAll] = gather(spikesGPU, spikeIndexAllGPU);
     catch
         warning("GPU device unavailable. Using CPU...");
-        [spikesAmp, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th, "MinPeakDistance", tLen / 2);
+        [spikesAmp, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th, "MinPeakDistance", waveSize / 2);
     end
 
     if isempty(spikesAmp)
@@ -65,18 +58,18 @@ function sortResult = templateMatching(data, sortResult0)
     stdSpike = std(spikesAmp);
 
     % For this channel
-    Waveforms = zeros(length(spikesAmp), tLen);
+    Waveforms = zeros(length(spikesAmp), waveSize);
     spikeIndex = zeros(length(spikesAmp), 1);
     disp('Extracting Waveforms...');
 
     for sIndex = 1:length(spikesAmp)
 
         % Ignore the beginning and the end of the wave
-        if spikeIndexAll(sIndex) - floor(tLen / 2) > 0 && spikeIndexAll(sIndex) + floor(tLen / 2) <= size(wave, 2)
+        if spikeIndexAll(sIndex) - floor(waveSize / 2) > 0 && spikeIndexAll(sIndex) + floor(waveSize / 2) <= size(wave, 2)
 
             % Exclude possible artifacts
             if spikesAmp(sIndex) <= meanSpike + 3 * stdSpike
-                Waveforms(sIndex, :) = wave(spikeIndexAll(sIndex) - floor(tLen / 2) + 1:spikeIndexAll(sIndex) + floor(tLen / 2));
+                Waveforms(sIndex, :) = wave(spikeIndexAll(sIndex) - floor(waveSize / 2) + 1:spikeIndexAll(sIndex) + floor(waveSize / 2));
                 spikeIndex(sIndex) = spikeIndexAll(sIndex);
             end
 
@@ -108,21 +101,19 @@ function sortResult = templateMatching(data, sortResult0)
 
     sortResult.pcaData = pcaData;
 
-    %% Template Matching
+    %% Template Matching with PCA Data
     disp('Template matching...');
-    sortResult.clusterCenter = zeros(tNum, size(pcaData, 2));
-    MSE = calMSE(Waveforms, templates);
+    sortResult.clusterCenter = sortResult0.clusterCenter;
+    SSE_norm = calNormalizedSSE(pcaData, sortResult.clusterCenter);
     
-    [MSE_min, sortResult.clusterIdx] = min(MSE, [], 2);
+    [SSE_norm_min, sortResult.clusterIdx] = min(SSE_norm, [], 2);
     sortResult.noiseClusterIdx = sortResult.clusterIdx;
-    meanValue = mean(MSE, "all");
-    stdValue = std(MSE, 0, "all");
-    sortResult.clusterIdx(MSE_min < meanValue - stdValue * 3 | MSE_min > meanValue + stdValue * 3) = 0;
-    sortResult.noiseClusterIdx(MSE_min >= meanValue - stdValue * 3 & MSE_min <= meanValue + stdValue * 3) = 0;
 
-    for tIndex = 1:tNum
-        sortResult.clusterCenter(tIndex, :) = mean(pcaData(sortResult.clusterIdx == tIndex, :));
-    end
+    p = 0.05; % prominence
+    cv = chi2inv(1 - p, size(pcaData, 2)); % critical value
+    sortResult.clusterIdx(SSE_norm_min > cv) = 0;
+    sortResult.noiseClusterIdx(SSE_norm_min <= cv) = 0;
+    sortResult.templates = genTemplates(sortResult);
 
     disp('Matching Done.');
     return;

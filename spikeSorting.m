@@ -68,6 +68,9 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
 
     end
 
+    nSpikes = size(pcaData, 1);
+    df = size(pcaData, 2); % degree of freedom
+
     %% K-means
     % Find an optimum K for K-means
     SSEs = [];
@@ -85,11 +88,11 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
             [K, SSEs] = elbow_method(pcaData, KmeansOpts);
         elseif strcmpi(KselectionMethod, "gap")
             % Gap statistic
-            KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
+            KmeansOpts.KArray = min([nSpikes min(KmeansOpts.KArray)]):min([nSpikes max(KmeansOpts.KArray)]);
             [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
         elseif strcmpi(KselectionMethod, "both")
             % Calculate both SSE and gaps but use K of maximum gaps
-            KmeansOpts.KArray = min([size(pcaData, 1) min(KmeansOpts.KArray)]):min([size(pcaData, 1) max(KmeansOpts.KArray)]);
+            KmeansOpts.KArray = min([nSpikes min(KmeansOpts.KArray)]):min([nSpikes max(KmeansOpts.KArray)]);
             [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
             [~, SSEs] = elbow_method(pcaData, KmeansOpts);
         elseif strcmpi(KselectionMethod, "preview")
@@ -115,12 +118,14 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
                 [K, SSEs] = elbow_method(pcaData, KmeansOpts);
                 % Gap statistic
                 % disp('Using gap statistic...');
-                % KmeansOpts.KArray = min([size(pcaData, 1), min(KmeansOpts.KArray)]):min([size(pcaData, 1), max(KmeansOpts.KArray)]);
+                % KmeansOpts.KArray = min([nSpikes, min(KmeansOpts.KArray)]):min([nSpikes, max(KmeansOpts.KArray)]);
                 % [K, gaps] = gap_statistic(pcaData, KmeansOpts.KArray, n_tests);
             end
 
             try
                 close(Fig);
+            catch e
+                warning(e);
             end
 
         end
@@ -138,17 +143,18 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
     [idx, C, ~] = kmeans(pcaData, K, 'MaxIter', KmeansOpts.maxIteration, 'Distance', 'sqeuclidean', 'Replicates', KmeansOpts.maxRepeat, 'Options', statset('Display', 'final'));
 
     % Possible noise of each cluster
-    distance = zeros(size(pcaData, 1), 1);
+    SSE_norm = zeros(nSpikes, 1);
+    pcaData_norm = normalize(pcaData, 1);
     noiseIdx = idx;
 
-    for index = 1:size(pcaData, 1)
-        distance(index) = norm(pcaData(index, :) - C(idx(index), :));
+    for index = 1:nSpikes
+        SSE_norm(index) = norm(pcaData_norm(index, :))^2;
     end
 
-    meanDist = mean(distance);
-    stdDist = std(distance);
-    idx(distance > meanDist + 3 * stdDist) = 0;
-    noiseIdx(distance <= meanDist + 3 * stdDist) = 0;
+    p = 0.05; % prominence
+    cv = chi2inv(1 - p, df); % critical value
+    idx(SSE_norm > cv) = 0; % set normalized SSE > critical value of chi(df) as noise
+    noiseIdx(SSE_norm <= cv) = 0;
 
     return;
 end

@@ -39,6 +39,11 @@ function PCAFigs = plotPCA(result, PCShown, visibilityOpt, colors)
 
         for index = 1:result(eIndex).K
             x = result(eIndex).pcaData(result(eIndex).clusterIdx == index, PCx);
+
+            if isempty(x)
+                continue;
+            end
+
             y = result(eIndex).pcaData(result(eIndex).clusterIdx == index, PCy);
             cx = result(eIndex).clusterCenter(index, PCx);
             cy = result(eIndex).clusterCenter(index, PCy);

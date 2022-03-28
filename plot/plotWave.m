@@ -36,16 +36,16 @@ function [waveFigs, templateFigs] = plotWave(result, N, visibilityOpt, colors)
             plotCol = 2;
 
             result(eIndex).templates = getOr(result(eIndex), "templates", genTemplates(result(eIndex)));
-            templates = [mean(result(eIndex).wave(result(eIndex).clusterIdx == 0, :)); result(eIndex).templates];
+            templates = [mean(result(eIndex).wave(result(eIndex).clusterIdx == 0, :), 1); result(eIndex).templates];
 
             % Waveforms of each cluster
             for cIndex = 0:result(eIndex).K
                 plotData = result(eIndex).wave(result(eIndex).clusterIdx == cIndex, :);
 
                 if ~isempty(plotData)
-                    stdValue = std(plotData);
+                    stdValue = std(plotData, 0, 1);
 
-                    mSubplot(waveFigs, ceil((result(eIndex).K + 1) / plotCol), plotCol, cIndex + 1, [1, 1], [0.05, 0.05, 0.1, 0.1]);
+                    mSubplot(waveFigs(eIndex), ceil((result(eIndex).K + 1) / plotCol), plotCol, cIndex + 1, [1, 1], [0.05, 0.05, 0.1, 0.1]);
                     x = 1:size(plotData, 2);
                     xSmooth = linspace(min(x), max(x));
                     yMin = min(result(eIndex).wave(result(eIndex).clusterIdx ~= 0, :), [], "all");

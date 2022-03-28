@@ -17,22 +17,29 @@ function MSEFigs = plotMSE(result, visibilityOpt, colors)
 
     for eIndex = 1:length(result)
         Waveforms = result(eIndex).wave;
-        templates = result(eIndex).templates;
-        [tNum, ~] = size(templates);
-        MSE = calMSE(Waveforms, templates);
+        templates = getOr(result(eIndex), "templates", genTemplates(result(eIndex)));
+        K = result(eIndex).K;
+        MSE = zeros(size(Waveforms, 1), K);
 
-        crossResult = cell(tNum);
+        for index = 1:K
+            MSE(:, index) = sum((Waveforms - templates(index, :)).^2, 2) / size(templates, 2);
+        end
 
-        colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(tNum / length(colors)) * length(colors), 1);
+        crossResult = cell(K);
 
-        for t1 = 1:tNum
-            MSEFigs(t1) = figure;
-            maximizeFig(MSEFigs(t1));
-            set(MSEFigs(t1), "Visible", visibilityOpt);
+        colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(K / length(colors)) * length(colors), 1);
 
+        MSEFigs(eIndex) = figure;
+        maximizeFig(MSEFigs(eIndex));
+        set(MSEFigs(eIndex), "Visible", visibilityOpt);
+
+        plotCol = 2;
+
+        for t1 = 1:K
+            mSubplot(MSEFigs(eIndex), ceil(result(eIndex).K / plotCol), plotCol, t1, [1, 1], [0.05, 0.05, 0.1, 0.1]);
             % similarity of template t2 on cluster t1
-            for t2 = 1:tNum
-                crossResult{t1, t2} = MSE(result(eIndex).clusterIdx == t1 | (result(eIndex).clusterIdx == t1 & result.noiseClusterIdx == t1), t2);
+            for t2 = 1:K
+                crossResult{t1, t2} = MSE(result(eIndex).clusterIdx == t1 | (result(eIndex).clusterIdx == t1 & result(eIndex).noiseClusterIdx == t1), t2);
                 histogram(crossResult{t1, t2}, "FaceColor", colorsAll{t2}, "DisplayName", ['template ', num2str(t2)]); hold on;
             end
 
