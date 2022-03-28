@@ -6,7 +6,7 @@ This sorting method is simply based on PCA and K-means.
 
 **By now, overlapping spikes are ignored.**
 
-`mysort` is for TDT Block data in .mat format. It should contain at least fields named `streams` or `snips`. `streams` should contain fields named `Wave`, which contains fields `data` (a $m\times n$ matrix of entire recorded waves, channels along row), `fs` (sampling rate, in Hz) and `channel` (a $m\times1$ vector specifying channel numbers). `snips` should contain fields named `data` (a $$m\times p$$ matrix of waveforms of spikes, waveform channel number along row and waveform points along column), `fs`, `chan` (a $m\times1$ vector specifying channel number of each waveform).
+`mysort` is for TDT Block data in .mat format. It should contain at least fields named `streams` or `snips`. `streams` should contain fields named `Wave`, which contains fields `data` (a m\*n matrix of entire recorded waves, channels along row), `fs` (sampling rate, in Hz) and `channel` (a m\*1 vector specifying channel numbers). `snips` should contain fields named `data` (a m\*p matrix of waveforms of spikes, waveform channel number along row and waveform points along column), `fs`, `chan` (a m\*1 vector specifying channel number of each waveform).
 
 `batchSorting` is for waves or waveforms from any recording platform. For multi-channel data, it runs in loops of sorting every single channel, considering channels to be independent.
 
