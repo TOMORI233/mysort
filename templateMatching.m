@@ -1,12 +1,13 @@
 function sortResult = templateMatching(data, sortResult0)
     % Description: sort TDT data with template matching.
-    %     Assume that data0 and data1 are different recorded protocol data from one cell or from one long-term recording data.
-    %     Sort data0 with mysort to generate spike waveform templates and apply template matching to data1.
-    %     The template matching algorithm is based on mean sqaure error (MSE).
-    %     The basic principal is that the amplitude of spikes from the same cell follows a Gaussian normal distribution.
-    %     Thus, SSEs between a template and waveforms followa a chi-square distribution.
-    %     Using normalized PCA data for SSE calculation can better characterize similarity.
-    %     The confidence interval is [0, chi2inv(0.95, df)], where df is the number of principal components.
+    % Assume that data0 and data1 are different recorded protocol data from one cell or from one long-term recording data.
+    % Sort data0 with mysort to generate spike waveform templates and apply template matching to data1.
+    % The template matching algorithm is based on mean sqaure error (MSE).
+    % The basic principal is that the amplitude of spikes from the same cell follows a Gaussian normal distribution.
+    % Thus, SSEs between a template and waveforms followa a chi-square distribution.
+    % Using normalized PCA data for SSE calculation can better characterize similarity.
+    % The confidence interval is [0, chi2inv(0.95, df)], where df is the number of principal components.
+    %
     % Input:
     %     data: TDT Block data, specified as a struct
     %           It should at least contain streams.Wave.data and streams.Wave.fs
@@ -18,6 +19,7 @@ function sortResult = templateMatching(data, sortResult0)
     %     sortResult = templateMatching(data1, sortResult0);
 
     addpath(genpath(fileparts(mfilename('fullpath'))));
+    warning on;
 
     %% Params Settings
     run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
@@ -34,7 +36,8 @@ function sortResult = templateMatching(data, sortResult0)
     wave = data.streams.Wave.data(1, :);
     [~, waveSize] = size(sortResult0.wave);
     th = sortResult0.th;
-    sortResult.K = sortResult0.K;
+    K = sortResult0.K;
+    sortResult.K = K;
     sortResult.sortOpts = sortOpts;
 
     %% Spike Extraction
@@ -85,7 +88,7 @@ function sortResult = templateMatching(data, sortResult0)
     sortResult.wave = Waveforms;
 
     % MATLAB - pca
-    [~, SCORE, latent] = pca(Waveforms * 1e6);
+    [coeff, SCORE, latent] = pca(Waveforms * sortResult0.sortOpts.scaleFactor);
     explained = latent / sum(latent);
     contrib = 0;
 
@@ -93,7 +96,12 @@ function sortResult = templateMatching(data, sortResult0)
         contrib = contrib + explained(index);
 
         if contrib >= CVCRThreshold
-            pcaData = SCORE(:, 1:index);
+            
+            if size(sortResult0.pcaData, 2) ~= index
+                warning("PC numbers are different. The two data blocks may not come from the same cell");
+            end
+
+            pcaData = SCORE(:, 1:size(sortResult0.pcaData, 2));
             break;
         end
 
@@ -103,8 +111,14 @@ function sortResult = templateMatching(data, sortResult0)
 
     %% Template Matching with PCA Data
     disp('Template matching...');
-    sortResult.clusterCenter = sortResult0.clusterCenter;
-    SSE_norm = calNormalizedSSE(pcaData, sortResult.clusterCenter);
+    temp = normalize([sortResult0.pcaData; sortResult0.clusterCenter], 1);
+    C_norm = temp(end - K + 1:end, :);
+    pcaData_norm = normalize(pcaData, 1);
+    SSE_norm = zeros(size(pcaData_norm, 1), K);
+
+    for kIndex = 1:K
+        SSE_norm(:, kIndex) = sum((pcaData_norm - C_norm(kIndex, :)).^2, 2);
+    end
     
     [SSE_norm_min, sortResult.clusterIdx] = min(SSE_norm, [], 2);
     sortResult.noiseClusterIdx = sortResult.clusterIdx;
@@ -114,6 +128,12 @@ function sortResult = templateMatching(data, sortResult0)
     sortResult.clusterIdx(SSE_norm_min > cv) = 0;
     sortResult.noiseClusterIdx(SSE_norm_min <= cv) = 0;
     sortResult.templates = genTemplates(sortResult);
+
+    sortResult.clusterCenter = zeros(K, size(C_norm, 2));
+
+    for kIndex = 1:K
+        sortResult.clusterCenter(kIndex, :) = mean(pcaData(sortResult.clusterIdx == kIndex, :), 1);
+    end
 
     disp('Matching Done.');
     return;

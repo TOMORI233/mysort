@@ -143,13 +143,11 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
     [idx, C, ~] = kmeans(pcaData, K, 'MaxIter', KmeansOpts.maxIteration, 'Distance', 'sqeuclidean', 'Replicates', KmeansOpts.maxRepeat, 'Options', statset('Display', 'final'));
 
     % Possible noise of each cluster
-    SSE_norm = zeros(nSpikes, 1);
-    pcaData_norm = normalize(pcaData, 1);
+    temp = normalize([pcaData; mean(pcaData, 1)], 1);
+    pcaData_norm = temp(1:end - 1, :);
+    C_norm = temp(end, :);
+    SSE_norm = sum((pcaData_norm - C_norm).^2, 2);
     noiseIdx = idx;
-
-    for index = 1:nSpikes
-        SSE_norm(index) = norm(pcaData_norm(index, :))^2;
-    end
 
     p = 0.05; % prominence
     cv = chi2inv(1 - p, df); % critical value

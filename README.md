@@ -12,28 +12,16 @@ This sorting method is simply based on PCA and K-means.
 
 ```matlab
 % sortOpts (default)
-% addpath(genpath(fileparts(mfilename('fullpath'))));
-% run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
-sortOpts.th = 1e-5 * ones(1, size(waves, 1));
-sortOpts.fs = 12207.03;
-sortOpts.waveLength = 1.5e-3;
-sortOpts.scaleFactor = 1e6;
-sortOpts.CVCRThreshold = 0.9;
-sortOpts.KselectionMethod = "gap";
-KmeansOpts.KArray = 1:10;
-KmeansOpts.maxIteration = 100;
-KmeansOpts.maxRepeat = 3;
-KmeansOpts.plotIterationNum = 0;
-sortOpts.KmeansOpts = KmeansOpts;
+run('defaultConfig.m');
 
 % 1. Use raw wave data
-% waves is an m×n matrix, with channels along row and sampling points along column
-% channels is an m×1 column vector, which specifies the channel number of each wave sample
+% waves is an m*n matrix, with channels along row and sampling points along column
+% channels is an m*1 column vector, which specifies the channel number of each wave sample
 result = batchSorting(waves, channels, sortOpts);
 
 % 2. Use extracted waveforms
-% Waveforms is an m×n matrix, with channels along row and waveform points along column
-% channels is an m×1 column vector, which specifies the channel number of each waveform
+% Waveforms is an m*n matrix, with channels along row and waveform points along column
+% channels is an m*1 column vector, which specifies the channel number of each waveform
 result = batchSorting([], channels, sortOpts, Waveforms);
 ```
 
@@ -104,7 +92,7 @@ sortResult = mysort(data, channels, "reselect", "both"); % use gap statistic but
 sortResult = mysort(data, channels, "reselect", "preview"); % preview 3-D PCA data and input a K
 ```
 
-5. For more detailed settings, specify your own `sortOpts`
+5. For more detailed settings, specify your own `sortOpts` as the last parameter input of `mysort`
 
 ```matlab
 sortResult = mysort(..., sortOpts);
@@ -116,5 +104,5 @@ sortResult = mysort(..., sortOpts);
 plotSSEorGap(sortResult); % select an optimum K
 plotPCA(sortResult, [1, 2, 3]); % view clusters in 3-D PCA space. Also you can specify the second parameter with  a 2-element vector, which will show clusters in 2-D PCA space.
 plotWave(sortResult); % view waves of different clusters
-plotMSE(sortResult); % histogram of MSE of each template on each cluster
+plotNormalizedSSE(sortResult); % histogram of normalized SSE of each template on each cluster
 ```

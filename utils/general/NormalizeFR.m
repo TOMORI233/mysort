@@ -1,6 +1,4 @@
 function result = NormalizeFR(data, normalizationSettings)
-    result = [];
-
     edge = normalizationSettings.baselineWindow; % ms
     binSize = edge(2) - edge(1); % ms
     spike = cell2mat(data.raster);

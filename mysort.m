@@ -101,7 +101,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     elseif isa(KorMethod, 'string') || isa(KorMethod, 'char')
         sortOpts.KselectionMethod = KorMethod;
     else
-        error('参数KorMethod类型错误');
+        error('Invalid Parameter Input: KorMethod');
     end
 
     %% Sort
@@ -125,6 +125,8 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
 
         try
             close(Fig);
+        catch e
+            disp(e);
         end
 
         sortResult = batchSorting(waves, channels, sortOpts);
@@ -170,7 +172,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
         end
 
     else
-        error('thOpt invalid!');
+        error('Invalid Parameter Input: thOpt');
     end
 
     return;
