@@ -29,21 +29,25 @@ function Figs = plotWaveAmp(result, visibilityOpt, colors)
         waveAmp = result(eIndex).waveAmp * 1e6; % uV
         binSize = 5; % uV
         edge = (floor(min(waveAmp) / binSize):ceil(max(waveAmp) / binSize)) * binSize;
+        edge_mid = edge - binSize / 2;
+        edge_mid(1) = edge_mid(1) + binSize / 2;
 
         for kIndex = 1:K
-            temp = mHist(waveAmp(result(eIndex).clusterIdx == kIndex), edge, binSize);
-            nFit = 200;
-            xSmooth = linspace(min(edge), max(edge), nFit);
-            y = interp1(edge, temp, xSmooth, 'cubic');
-            plot(xSmooth, y, "Color", colorsAll{kIndex}, "LineWidth", 2, "DisplayName", ['cluster ', num2str(kIndex)]);
-            hold on;
-            h = plot(edge, temp, ".", "Color", colorsAll{kIndex}, "MarkerSize", 20);
+            h = histogram(waveAmp(result(eIndex).clusterIdx == kIndex), "FaceColor", colorsAll{kIndex}, "FaceAlpha", 0.3, "BinEdges", edge);
             set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');
+            hold on;
+
+            ampHist = [0, h.Values];
+            xSmooth = linspace(min(edge_mid), max(edge_mid), 200);
+            y = interp1(edge_mid, ampHist, xSmooth, 'cubic');
+            plot(xSmooth, y, "Color", colorsAll{kIndex}, "LineWidth", 2, "DisplayName", ['cluster ', num2str(kIndex)]);
         end
 
         legend;
         xlabel("Spike amplitude (\muV)");
         ylabel("Count");
+        xlim([min(edge), inf]);
+        ylim([0, inf]);
         title("Spike amplitude distribution of each cluster");
     end
 
