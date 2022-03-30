@@ -29,6 +29,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     %     result: a struct array, each element of which is a result of one channel(electrode), containing fields:
     %             - chanIdx: channel(electrode) number
     %             - wave: spike waveforms of this channel(electrode), samples along row
+    %             - waveAmp: spike amplitude vector
     %             - sortOpts: sort settings
     %             - spikeTimeAll: spike time of raw wave data (if used), noise included
     %             - clusterIdx: cluster index of each spike waveform sample, with 0 as noise
@@ -168,6 +169,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         end
 
         result(cIndex).wave = data / scaleFactor;
+        result(cIndex).waveAmp = double(waves(cIndex, spikeIndex{cIndex})');
         result(cIndex).sortOpts = sortOpts;
 
         if isfield(sortOpts, "th")

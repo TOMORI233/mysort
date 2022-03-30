@@ -38,6 +38,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     %     sortResult: a struct array, each element of which is a result of one channel(electrode), containing fields:
     %                 - chanIdx: channel(electrode) number
     %                 - wave: spike waveforms of this channel(electrode), samples along row
+    %                 - waveAmp: spike amplitude vector
     %                 - sortOpts: sort settings
     %                 - th: threshold for spike extraction (if thOpts is "reselect")
     %                 - spikeTimeAll: spike time of raw wave data (if used), noise included. (unit: sec)
@@ -107,7 +108,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     %% Sort
     if strcmp(thOpt, "reselect")
         %% Reselect Th for Spike and Waveform Extraction
-        t = reselectT0:1 / fs:(min([reselectT0 + 200, size(waves, 2) / fs])); % preview at most 200-sec wave
+        t = reselectT0:1 / fs:(min([reselectT0 + 200, floor(size(waves, 2) / fs)])); % preview at most 200-sec wave
         Fig = figure;
 
         if ~isfield(sortOpts, "th") || isempty(sortOpts.th) % th does not exist or is empty
