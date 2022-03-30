@@ -107,7 +107,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     %% Sort
     if strcmp(thOpt, "reselect")
         %% Reselect Th for Spike and Waveform Extraction
-        t = reselectT0:1 / fs:(min([reselectT0 + 50, size(waves, 2) / fs])); % preview at most 50-sec wave
+        t = reselectT0:1 / fs:(min([reselectT0 + 200, size(waves, 2) / fs])); % preview at most 200-sec wave
         Fig = figure;
 
         if ~isfield(sortOpts, "th") || isempty(sortOpts.th) % th does not exist or is empty

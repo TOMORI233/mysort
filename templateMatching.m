@@ -37,6 +37,7 @@ function sortResult = templateMatching(data, sortResult0)
     [~, waveSize] = size(sortResult0.wave);
     th = sortResult0.th;
     K = sortResult0.K;
+    templates = getOr(sortResult0, "templates", genTemplates(sortResult0));
     sortResult.K = K;
     sortResult.sortOpts = sortOpts;
 
@@ -87,8 +88,11 @@ function sortResult = templateMatching(data, sortResult0)
     sortResult.spikeTimeAll = (spikeIndexAll' - 1) / fs;
     sortResult.wave = Waveforms;
 
+    %% PCA
+    % [Waveforms; templates]
+    % Find PCA result of templates in a different PCA space
     % MATLAB - pca
-    [coeff, SCORE, latent] = pca(Waveforms * sortResult0.sortOpts.scaleFactor);
+    [coeff, SCORE, latent] = pca([Waveforms; templates] * sortResult0.sortOpts.scaleFactor);
     explained = latent / sum(latent);
     contrib = 0;
 
@@ -96,12 +100,11 @@ function sortResult = templateMatching(data, sortResult0)
         contrib = contrib + explained(index);
 
         if contrib >= CVCRThreshold
-            
-            if size(sortResult0.pcaData, 2) ~= index
-                warning("PC numbers are different. The two data blocks may not come from the same cell");
-            end
+            pcaData = SCORE(1:end - K, 1:index);
 
-            pcaData = SCORE(:, 1:size(sortResult0.pcaData, 2));
+            temp = normalize(SCORE(:, 1:index), 1);
+            pcaData_norm = temp(1:end - K, :);
+            C_norm = temp(end - K + 1:end, :);
             break;
         end
 
@@ -111,9 +114,6 @@ function sortResult = templateMatching(data, sortResult0)
 
     %% Template Matching with PCA Data
     disp('Template matching...');
-    temp = normalize([sortResult0.pcaData; sortResult0.clusterCenter], 1);
-    C_norm = temp(end - K + 1:end, :);
-    pcaData_norm = normalize(pcaData, 1);
     SSE_norm = zeros(size(pcaData_norm, 1), K);
 
     for kIndex = 1:K

@@ -1,6 +1,6 @@
 # README
 
-### Introduction
+### 1. Introduction
 
 This sorting method is simply based on PCA and K-means.
 
@@ -8,24 +8,9 @@ This sorting method is simply based on PCA and K-means.
 
 `mysort` is for TDT Block data in .mat format. It should contain at least fields named `streams` or `snips`. `streams` should contain fields named `Wave`, which contains fields `data` (a m\*n matrix of entire recorded waves, channels along row), `fs` (sampling rate, in Hz) and `channel` (a m\*1 vector specifying channel numbers). `snips` should contain fields named `data` (a m\*p matrix of waveforms of spikes, waveform channel number along row and waveform points along column), `fs`, `chan` (a m\*1 vector specifying channel number of each waveform).
 
-`batchSorting` is for waves or waveforms from any recording platform. For multi-channel data, it runs in loops of sorting every single channel, considering channels to be independent.
+### 2. Instructions
 
-```matlab
-% sortOpts (default)
-run('defaultConfig.m');
-
-% 1. Use raw wave data
-% waves is an m*n matrix, with channels along row and sampling points along column
-% channels is an m*1 column vector, which specifies the channel number of each wave sample
-result = batchSorting(waves, channels, sortOpts);
-
-% 2. Use extracted waveforms
-% Waveforms is an m*n matrix, with channels along row and waveform points along column
-% channels is an m*1 column vector, which specifies the channel number of each waveform
-result = batchSorting([], channels, sortOpts, Waveforms);
-```
-
-### Instructions
+#### 2.1 Mysort
 
 See `mysort.m` for more detailed information.
 
@@ -102,7 +87,43 @@ sortResult = mysort(..., sortOpts);
 
 ```matlab
 plotSSEorGap(sortResult); % select an optimum K
-plotPCA(sortResult, [1, 2, 3]); % view clusters in 3-D PCA space. Also you can specify the second parameter with  a 2-element vector, which will show clusters in 2-D PCA space.
-plotWave(sortResult); % view waves of different clusters
+plotPCA(sortResult, [1, 2, 3]); % view clusters in 3-D PCA space. Also you can specify the second parameter with  a 2-element vector, which will show clusters in 2-D PCA space (default: [1 2]).
+plotWave(sortResult); % view waves and templates of different clusters
 plotNormalizedSSE(sortResult); % histogram of normalized SSE of each template on each cluster
 ```
+
+#### 2.2 Template Matching
+
+Template matching is based on sum  of square error of normalized spike PCA data and template PCA data. With critical value (*cv*) at prominence level *p*, define *SSE* > *cv* as noise.
+
+In some case, you have several recordings of different protocols from one cell. Usually the spike waveforms among files are the same. You can sort one file using `mysort` and apply `templateMatching` to other files.
+
+To sort a long recording, you can also sort a small part of it at first and apply `templateMatching` to the rest premised on cell invariance.
+
+```matlab
+% 1. Sort data0 with mysort
+sortResult0 = mysort(data0);
+
+% 2. Match templates of data0 in data1
+sortResult1 = templateMatching(data1, sortResult0);
+```
+
+#### 2.3 Sort with other data struct
+
+`batchSorting` is for waves or waveforms from any recording platform. For multi-channel data, it runs in loops of sorting every single channel, considering each channel to be independent.
+
+```matlab
+% Specify yout own sorting options
+run('defaultConfig.m');
+
+% 1. Use raw wave data
+% waves is an m*n matrix, with channels along row and sampling points along column
+% channels is an m*1 column vector, which specifies the channel number of each wave sample
+result = batchSorting(waves, channels, sortOpts);
+
+% 2. Use extracted waveforms
+% Waveforms is an m*n matrix, with channels along row and waveform points along column
+% channels is an m*1 column vector, which specifies the channel number of each waveform
+result = batchSorting([], channels, sortOpts, Waveforms);
+```
+
