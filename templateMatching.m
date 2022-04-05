@@ -2,7 +2,7 @@ function sortResult = templateMatching(data, sortResult0)
     % Description: sort TDT data with template matching.
     % Assume that data0 and data1 are different recorded protocol data from one cell or from one long-term recording data.
     % Sort data0 with mysort to generate spike waveform templates and apply template matching to data1.
-    % The template matching algorithm is based on mean sqaure error (MSE).
+    % The template matching algorithm is based on sum of sqaure error (SSE).
     % The basic principal is that the amplitude of spikes from the same cell follows a Gaussian normal distribution.
     % Thus, SSEs between a template and waveforms followa a chi-square distribution.
     % Using normalized PCA data for SSE calculation can better characterize similarity.

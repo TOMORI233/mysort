@@ -39,7 +39,7 @@ function mAxe = mSubplot(Fig, row, col, index, nSize, margins, paddings)
     axeWidth = (1 - margins(1) - margins(2)) * divWidth * nX;
     axeHeight = (1 - margins(3) - margins(4)) * divHeight * nY;
 
-%     divAxe = axes(Fig, "Position", [divX, divY, divWidth * nX, divHeight * nY], "Box", "on");
+    % divAxe = axes(Fig, "Position", [divX, divY, divWidth * nX, divHeight * nY], "Box", "on");
     mAxe = axes(Fig, "Position", [axeX, axeY, axeWidth, axeHeight], "Box", "on");
 
     return;
