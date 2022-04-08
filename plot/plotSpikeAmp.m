@@ -26,7 +26,7 @@ function Figs = plotSpikeAmp(result, visibilityOpt, colors)
         set(Figs(eIndex), "Visible", visibilityOpt);
 
         colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(K / length(colors)) * length(colors), 1);
-        waveAmp = result(eIndex).waveAmp * 1e6; % uV
+        waveAmp = max(result(eIndex).wave, [], 2) * 1e6; % uV
         binSize = 5; % uV
         edge = (floor(min(waveAmp) / binSize):ceil(max(waveAmp) / binSize)) * binSize;
         edge_mid = edge - binSize / 2;
