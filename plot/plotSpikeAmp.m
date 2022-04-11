@@ -17,6 +17,8 @@ function Figs = plotSpikeAmp(result, visibilityOpt, colors)
         colors = generateColorGrad(12, 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
     end
 
+    scaleFactor = getOr(result(1).sortOpts, "scaleFactor", 1e6);
+
     for eIndex = 1:length(result)
         K = result(eIndex).K;
 
@@ -26,7 +28,7 @@ function Figs = plotSpikeAmp(result, visibilityOpt, colors)
         set(Figs(eIndex), "Visible", visibilityOpt);
 
         colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(K / length(colors)) * length(colors), 1);
-        waveAmp = max(result(eIndex).wave, [], 2) * 1e6; % uV
+        waveAmp = max(result(eIndex).wave, [], 2) * scaleFactor; % uV
         binSize = 5; % uV
         edge = (floor(min(waveAmp) / binSize):ceil(max(waveAmp) / binSize)) * binSize;
         edge_mid = edge - binSize / 2;
