@@ -14,7 +14,7 @@ function Figs = plotSpikeAmp(result, visibilityOpt, colors)
     end
         
     if nargin < 3
-        colors = generateColorGrad(12, 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
+        colors = generateColorGrad(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
     end
 
     scaleFactor = getOr(result(1).sortOpts, "scaleFactor", 1e6);

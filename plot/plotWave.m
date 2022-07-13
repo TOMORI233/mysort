@@ -22,7 +22,7 @@ function [waveFigs, templateFigs] = plotWave(result, N, visibilityOpt, colors)
     end
         
     if nargin < 4
-        colors = generateColorGrad(12, 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
+        colors = generateColorGrad(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
     end
 
     for eIndex = 1:length(result)
