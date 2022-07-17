@@ -36,7 +36,7 @@ function [waveFigs, templateFigs] = plotWave(result, N, visibilityOpt, colors)
             plotCol = 2;
 
             result(eIndex).templates = getOr(result(eIndex), "templates", genTemplates(result(eIndex)));
-            templates = [mean(result(eIndex).wave(result(eIndex).clusterIdx == 0, :), 1); result(eIndex).templates];
+            templates = [mean(result(eIndex).wave(result(eIndex).clusterIdx == 0, :), 1); genTemplates(result(eIndex))];
 
             % Waveforms of each cluster
             for cIndex = 0:result(eIndex).K

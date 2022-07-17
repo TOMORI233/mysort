@@ -34,6 +34,36 @@ function selectedIdx = recluster(result, PCShown, colors)
 
     Fig = figure;
     maximizeFig(Fig);
+    mAxe = mSubplot(Fig, 1, 1, 1, 1, [0, 0, 0, 0], [0.1, 0.1, 0.1, 0.1]);
+
+    cm = uicontextmenu(Fig);
+    mAxe.ContextMenu = cm;
+
+    m1 = uimenu(cm, 'Text', 'Place Polygon');
+    set(m1, "MenuSelectedFcn", {@menuPlaceFcn, Fig});
+
+    mView = uimenu(cm, 'Text', 'View');
+    m2 = uimenu(mView, 'Text', 'View Waveforms');
+    set(m2, "MenuSelectedFcn", {@menuViewFcn, Fig, 1});
+    set(m2, "Enable", "off");
+    m3 = uimenu(mView, 'Text', 'View PCA');
+    set(m3, "MenuSelectedFcn", {@menuViewFcn, Fig, 2});
+    set(m3, "Enable", "off");
+    m4 = uimenu(mView, 'Text', 'View Amplitude');
+    set(m4, "MenuSelectedFcn", {@menuViewFcn, Fig, 3});
+    set(m4, "Enable", "off");
+    m5 = uimenu(mView, 'Text', 'View SSE');
+    set(m5, "MenuSelectedFcn", {@menuViewFcn, Fig, 4});
+    set(m5, "Enable", "off");
+
+    m6 = uimenu(cm, 'Text', 'Confirm');
+    set(m6, "MenuSelectedFcn", {@menuConfirmFcn, Fig});
+    set(m6, "Enable", "off");
+
+    DTO.result = result;
+    DTO.PCx = PCx;
+    DTO.PCy = PCy;
+    set(Fig, "UserData", DTO);
 
     for index = 1:result.K
         idx = find(result.clusterIdx == index);
@@ -67,9 +97,48 @@ function selectedIdx = recluster(result, PCShown, colors)
     xlabel(['PC-' num2str(PCx)]);
     ylabel(['PC-' num2str(PCy)]);
 
-    %% get boarder
-    [xv, yv] = genPolygon(gca);
-    selectedIdx = inpolygon(result.pcaData(:, PCx), result.pcaData(:, PCy), xv, yv);
-
+    uiwait(Fig);
+    DTO = get(Fig, "UserData");
+    selectedIdx = inpolygon(result.pcaData(:, PCx), result.pcaData(:, PCy), DTO.xv, DTO.yv);
     return;
+end
+
+%% MenuSelectedFcn
+function menuPlaceFcn(handle, eventdata, Fig)
+    mAxe = gca;
+    menus = mAxe.ContextMenu.Children;
+    menus = [menus; menus(2).Children];
+    set(menus, "Enable", "off");
+    DTO = get(Fig, "UserData");
+    delete(getOr(DTO, "lines"));
+    [xv, yv, lines] = genPolygon(gca);
+    DTO.xv = xv;
+    DTO.yv = yv;
+    DTO.lines = lines;
+    set(Fig, "UserData", DTO);
+    set(menus, "Enable", "on");
+end
+
+function menuConfirmFcn(handle, eventdata, Fig)
+    uiresume(Fig);
+end
+
+function menuViewFcn(handle, eventdata, Fig, opt)
+    DTO = get(Fig, "UserData");
+    result = DTO.result;
+    selectedIdx = inpolygon(result.pcaData(:, DTO.PCx), result.pcaData(:, DTO.PCy), DTO.xv, DTO.yv);
+    result.clusterIdx(selectedIdx & ~logical(result.noiseClusterIdx)) = result.K + 1;
+    result.K = result.K + 1;
+    [result.templates, result.clusterCenter] = genTemplates(result);
+
+    switch opt
+        case 1
+            plotWave(result);
+        case 2
+            plotPCA(result, [1 2 3]);
+        case 3
+            plotSpikeAmp(result);
+        case 4
+            plotNormalizedSSE(result);
+    end
 end

@@ -39,27 +39,23 @@ function PCAFigs = plotPCA(result, PCShown, visibilityOpt, colors)
 
         for index = 1:result(eIndex).K
             x = result(eIndex).pcaData(result(eIndex).clusterIdx == index, PCx);
+            y = result(eIndex).pcaData(result(eIndex).clusterIdx == index, PCy);
 
             if isempty(x)
                 continue;
             end
 
-            y = result(eIndex).pcaData(result(eIndex).clusterIdx == index, PCy);
-            cx = result(eIndex).clusterCenter(index, PCx);
-            cy = result(eIndex).clusterCenter(index, PCy);
-
             colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(result(eIndex).K / length(colors)) * length(colors), 1);
 
             if exist("PCz", "var")
                 z = result(eIndex).pcaData(result(eIndex).clusterIdx == index, PCz);
-                cz = result(eIndex).clusterCenter(index, PCz);
                 plot3(x, y, z, '.', 'MarkerSize', 12, 'Color', colorsAll{index}, 'DisplayName', ['cluster ' num2str(index)]); hold on;
-                h = plot3(cx, cy, cz, 'kh', 'LineWidth', 1.2, 'MarkerSize', 15);
+                h = plot3(mean(x), mean(y), mean(z), 'kh', 'LineWidth', 1.2, 'MarkerSize', 15);
                 grid on;
                 zlabel(['PC-' num2str(PCz)]);
             else
                 plot(x, y, '.', 'MarkerSize', 12, 'Color', colorsAll{index}, 'DisplayName', ['cluster ' num2str(index)]); hold on;
-                h = plot(cx, cy, 'kx', 'LineWidth', 1.2, 'MarkerSize', 15);
+                h = plot(mean(x), mean(y), 'kx', 'LineWidth', 1.2, 'MarkerSize', 15);
             end
 
             set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');

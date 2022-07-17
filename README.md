@@ -135,7 +135,7 @@ result = batchSorting([], channels, sortOpts, Waveforms);
 
 #### 2.4 Re-cluster
 
-`recluster` is for merging and splitting in 2-D PCA view. You can generate a polygon to select spikes whose cluster index you want to alter.
+`recluster` is for merging and splitting in 2-D PCA view. You can generate a polygon to select spikes whose cluster index you want to alter. After selection, right click the PCA view and click `confirm` to continue with your work. Or you can also preview waveforms, PCA, spike amplitude and SSE of the selected region, and redo the selection if unsatisfied.
 
 ```matlab
 result = mysort(data);
