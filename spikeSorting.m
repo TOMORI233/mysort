@@ -1,7 +1,7 @@
 function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CVCRThreshold, KselectionMethod, KmeansOpts)
     % Description: use PCA and K-means for single channel spike sorting
     % Input:
-    %     Waveforms: samples along row, each column represents a feature
+    %     Waveforms: each row is a spike waveform and each column is a sample point
     %     CVCRThreshold: cumulative variance contribution rate threshold for principal components selection
     %     KselectionMethod: method used to find an optimum K value for K-means
     %                       - "elbow": use elbow method
@@ -101,13 +101,23 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
             % set(Fig, "outerposition", get(0, "screensize"));
             maximizeFig(Fig);
 
-            try
+            if size(pcaData, 2) >= 3
                 plot3(pcaData(:, 1), pcaData(:, 2), pcaData(:, 3), 'k.', 'MarkerSize', 12, 'DisplayName', 'Raw PCA data');
                 legend;
                 title('Preview 3-D PCA data');
                 xlabel('PC-1'); ylabel('PC-2'); zlabel('PC-3');
-            catch
-                warning('PCA dimensions < 3. Please check your data and waveform length.');
+            elseif size(pcaData, 2) == 2
+                warning('PCA dimensions = 2. Please check your data and waveform length.');
+                plot(pcaData(:, 1), pcaData(:, 2), 'k.', 'MarkerSize', 12, 'DisplayName', 'Raw PCA data');
+                legend;
+                title('Preview 2-D PCA data');
+                xlabel('PC-1'); ylabel('PC-2');
+            else
+                warning('PCA dimensions = 1. Please check your data and waveform length.');
+                plot(pcaData(:, 1), 'k.', 'MarkerSize', 12, 'DisplayName', 'Raw PCA data');
+                legend;
+                title('Preview 1-D PCA data');
+                xlabel('PC-1');
             end
 
             K = validateInput(["non-negative", "integer"], 'Input a K value for K-means (zero for auto-searching): ');

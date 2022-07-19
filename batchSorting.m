@@ -8,8 +8,8 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
     %               If Waveforms is specified, each element of channels specifies a channel number for each waveform.
     %               If left empty or 0, all channels will be sorted.
     %     sortOpts: a sorting settings struct (if left empty, default settings will be used), containing:
-    %               - th: threshold for spike extraction, in volts (default: 1e-5)
-    %               - fs: sampling rate, in Hz (default: 24414.0625)
+    %               - th: threshold for spike extraction, in volts (default: [])
+    %               - fs: sampling rate, in Hz (default: [], using fs of [data])
     %               - waveLength: waveform length, in seconds (default: 1.5e-3)
     %               - scaleFactor: scale factor for waveforms (default: 1e+6)
     %               - CVCRThreshold: cumulative variance contribution rate threshold for principal components selection (default: 0.9)
