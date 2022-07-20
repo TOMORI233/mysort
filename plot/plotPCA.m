@@ -38,8 +38,9 @@ function PCAFigs = plotPCA(result, PCShown, visibilityOpt, colors)
         set(PCAFigs(eIndex), "Visible", visibilityOpt);
 
         for index = 1:result(eIndex).K
-            x = result(eIndex).pcaData(result(eIndex).clusterIdx == index, PCx);
-            y = result(eIndex).pcaData(result(eIndex).clusterIdx == index, PCy);
+            idx = result(eIndex).clusterIdx == index;
+            x = result(eIndex).pcaData(idx, PCx);
+            y = result(eIndex).pcaData(idx, PCy);
 
             if isempty(x)
                 continue;
@@ -48,7 +49,7 @@ function PCAFigs = plotPCA(result, PCShown, visibilityOpt, colors)
             colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(result(eIndex).K / length(colors)) * length(colors), 1);
 
             if exist("PCz", "var")
-                z = result(eIndex).pcaData(result(eIndex).clusterIdx == index, PCz);
+                z = result(eIndex).pcaData(idx, PCz);
                 plot3(x, y, z, '.', 'MarkerSize', 12, 'Color', colorsAll{index}, 'DisplayName', ['cluster ' num2str(index)]); hold on;
                 h = plot3(mean(x), mean(y), mean(z), 'kh', 'LineWidth', 1.2, 'MarkerSize', 15);
                 grid on;
@@ -62,11 +63,12 @@ function PCAFigs = plotPCA(result, PCShown, visibilityOpt, colors)
         end
 
         % Noise
-        nx = result(eIndex).pcaData(result(eIndex).clusterIdx == 0, PCx);
-        ny = result(eIndex).pcaData(result(eIndex).clusterIdx == 0, PCy);
+        idx = result(eIndex).clusterIdx == 0;
+        nx = result(eIndex).pcaData(idx, PCx);
+        ny = result(eIndex).pcaData(idx, PCy);
 
         if exist("PCz", "var")
-            nz = result(eIndex).pcaData(result(eIndex).clusterIdx == 0, PCz);
+            nz = result(eIndex).pcaData(idx, PCz);
             plot3(nx, ny, nz, 'ko', 'DisplayName', 'Noise');
         else
             plot(nx, ny, 'ko', 'DisplayName', 'Noise');

@@ -56,13 +56,16 @@ function selectedIdx = recluster(result, PCShown, colors)
     set(m5, "MenuSelectedFcn", {@menuViewFcn, Fig, 4});
     set(m5, "Enable", "off");
 
-    m6 = uimenu(cm, 'Text', 'Confirm');
-    set(m6, "MenuSelectedFcn", {@menuConfirmFcn, Fig});
-    set(m6, "Enable", "off");
+    m6 = uimenu(cm, 'Text', 'Change PC');
+    set(m6, "MenuSelectedFcn", {@menuChangePCFcn, Fig});
+
+    m7 = uimenu(cm, 'Text', 'Confirm');
+    set(m7, "MenuSelectedFcn", {@menuConfirmFcn, Fig});
 
     DTO.result = result;
     DTO.PCx = PCx;
     DTO.PCy = PCy;
+    DTO.colors = colors;
     set(Fig, "UserData", DTO);
 
     for index = 1:result.K
@@ -98,8 +101,16 @@ function selectedIdx = recluster(result, PCShown, colors)
     ylabel(['PC-' num2str(PCy)]);
 
     uiwait(Fig);
-    DTO = get(Fig, "UserData");
-    selectedIdx = inpolygon(result.pcaData(:, PCx), result.pcaData(:, PCy), DTO.xv, DTO.yv);
+
+    try
+        DTO = get(Fig, "UserData");
+        PCx = DTO.PCx;
+        PCy = DTO.PCy;
+        selectedIdx = inpolygon(result.pcaData(:, PCx), result.pcaData(:, PCy), DTO.xv, DTO.yv);
+    catch
+        selectedIdx = [];
+    end
+
     return;
 end
 
@@ -107,7 +118,7 @@ end
 function menuPlaceFcn(handle, eventdata, Fig)
     mAxe = gca;
     menus = mAxe.ContextMenu.Children;
-    menus = [menus; menus(2).Children];
+    menus = [menus; menus(3).Children];
     set(menus, "Enable", "off");
     DTO = get(Fig, "UserData");
     delete(getOr(DTO, "lines"));
@@ -141,4 +152,47 @@ function menuViewFcn(handle, eventdata, Fig, opt)
         case 4
             plotNormalizedSSE(result);
     end
+end
+
+function menuChangePCFcn(handle, eventdata, Fig)
+    DTO = get(Fig, "UserData");
+    result = DTO.result;
+    colors = DTO.colors;
+    [PCx, PCy] = pcInput(DTO.PCx, DTO.PCy);
+    DTO.PCx = PCx;
+    DTO.PCy = PCy;
+    set(Fig, "UserData", DTO);
+    cla;
+
+    for index = 1:result.K
+        idx = find(result.clusterIdx == index);
+        x = result.pcaData(idx, PCx);
+
+        if isempty(x)
+            continue;
+        end
+
+        y = result.pcaData(idx, PCy);
+        cx = result.clusterCenter(index, PCx);
+        cy = result.clusterCenter(index, PCy);
+
+        colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(result.K / length(colors)) * length(colors), 1);
+        plot(x, y, '.', 'MarkerSize', 12, 'Color', colorsAll{index}, 'DisplayName', ['cluster ' num2str(index)]); hold on;
+        h = plot(cx, cy, 'kx', 'LineWidth', 1.2, 'MarkerSize', 15);
+        set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');
+    end
+
+    % Noise
+    idx = find(result.clusterIdx == 0);
+    nx = result.pcaData(idx, PCx);
+    ny = result.pcaData(idx, PCy);
+    plot(nx, ny, 'ko', 'DisplayName', 'Noise');
+
+    % Origin data
+    % plot(result.pcaData(:, PCx), result.pcaData(:, PCy), 'k.', 'MarkerSize', 12, 'DisplayName', 'Origin');
+
+    legend;
+    title(['Channel: ', num2str(result.chanIdx), ' | nSamples = ', num2str(size(result.wave, 1))]);
+    xlabel(['PC-' num2str(PCx)]);
+    ylabel(['PC-' num2str(PCy)]);
 end

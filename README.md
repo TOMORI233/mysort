@@ -83,7 +83,7 @@ sortResult = mysort(data, channels, "reselect", "both"); % use gap statistic but
 sortResult = mysort(data, channels, "reselect", "preview"); % preview 3-D PCA data and input a K
 ```
 
-5. For more detailed settings, specify your own `sortOpts` as the last parameter input of `mysort`
+5. For more detailed settings, specify your own `sortOpts` as the last parameter input of `mysort`. See `defaultConfig.m` in folder `config` for more information about `sortOpts`.
 
 ```matlab
 sortResult = mysort(..., sortOpts);
@@ -119,7 +119,7 @@ sortResult1 = templateMatching(data1, sortResult0);
 `batchSorting` is for waves or waveforms from any recording platform. For multi-channel data, it runs in loops of sorting every single channel, considering each channel to be independent.
 
 ```matlab
-% Specify yout own sorting options
+% Specify your own sorting options
 run('defaultConfig.m');
 
 % 1. Use raw wave data
