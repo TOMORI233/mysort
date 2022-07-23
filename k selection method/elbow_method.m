@@ -1,5 +1,5 @@
 function [K, SSEs] = elbow_method(Data, KmeansOpts)
-    % Description: elbow method
+    % Description: elbow method for kmeans
     % Input:
     %     Data: samples along row, each column represents a feature
     %     KmeansOpts: kmeans settings, a struct containing:

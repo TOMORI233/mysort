@@ -16,6 +16,8 @@ Before you start using `mysort`, you should first download `MATLABUtils` and add
 git clone git@github.com:TOMORI233/MATLABUtils.git
 ```
 
+The latest supported version is MATLAB 2019b.
+
 #### 2.1 Mysort
 
 See `mysort.m` for more detailed information.
@@ -95,6 +97,7 @@ sortResult = mysort(..., sortOpts);
 plotSSEorGap(sortResult); % select an optimum K
 plotPCA(sortResult, [1, 2, 3]); % view clusters in 3-D PCA space. Also you can specify the second parameter with  a 2-element vector, which will show clusters in 2-D PCA space (default: [1 2]).
 plotWave(sortResult); % view waves and templates of different clusters
+plotSpikeAmp(sortResult); % spike amplitude distribution histogram
 plotNormalizedSSE(sortResult); % histogram of normalized SSE of each template on each cluster
 ```
 
@@ -121,6 +124,7 @@ sortResult1 = templateMatching(data1, sortResult0);
 ```matlab
 % Specify your own sorting options
 run('defaultConfig.m');
+sortOpts = defaultSortOpts;
 
 % 1. Use raw wave data
 % waves is an m*n matrix, with channels along row and sampling points along column
@@ -176,6 +180,3 @@ for kIndex = 1:K
 	SSE_norm(:, kIndex) = sum((pcaData_norm - C_norm(kIndex, :)).^2, 2);
 end
 ```
-
-
-
