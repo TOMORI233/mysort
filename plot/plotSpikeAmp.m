@@ -27,6 +27,21 @@ function Figs = plotSpikeAmp(result, visibilityOpt, colors)
         maximizeFig(Figs(eIndex));
         set(Figs(eIndex), "Visible", visibilityOpt);
 
+        mAxe1 = mSubplot(Figs(eIndex), 1, 5, 1, 4, [0, 0.05, 0, 0], [0.05, 0.05, 0.1, 0.1]);
+        mAxe2 = mSubplot(Figs(eIndex), 1, 5, 5, 1, [0, 0, 0, 0], [0.05, 0.05, 0.1, 0.1]);
+
+        cm = uicontextmenu(Figs(eIndex));
+        mAxe1.ContextMenu = cm;
+        mAxe2.ContextMenu = cm;
+    
+        m1 = uimenu(cm, 'Text', 'Show & Hide');
+        set(m1, "MenuSelectedFcn", {@menuShowAndHideFcn, Figs(eIndex), mAxe1, mAxe2});
+
+        DTO.result = result;
+        DTO.colors = colors;
+        DTO.scaleFactor = scaleFactor;
+        set(Figs(eIndex), "UserData", DTO);
+
         colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(K / length(colors)) * length(colors), 1);
         waveAmp = max(result(eIndex).wave, [], 2) * scaleFactor; % uV
         binSize = 5; % uV
@@ -35,23 +50,91 @@ function Figs = plotSpikeAmp(result, visibilityOpt, colors)
         edge_mid(1) = edge_mid(1) + binSize / 2;
 
         for kIndex = 1:K
-            h = histogram(waveAmp(result(eIndex).clusterIdx == kIndex), "FaceColor", colorsAll{kIndex}, "FaceAlpha", 0.3, "BinEdges", edge);
+            idx = result(eIndex).clusterIdx == kIndex;
+
+            if isempty(find(idx, 1))
+                continue;
+            end
+
+            scatter(mAxe1, result(eIndex).spikeTimeAll(idx), waveAmp(idx), 30, "filled", "MarkerFaceColor", colorsAll{kIndex}, "DisplayName", ['cluster ', num2str(kIndex)]);
+            hold(mAxe1, "on");
+
+            h = histogram(mAxe2, waveAmp(idx), "FaceColor", colorsAll{kIndex}, "FaceAlpha", 0.3, "BinEdges", edge);
             set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');
-            hold on;
+            hold(mAxe2, "on");
 
             ampHist = [0, h.Values];
             xSmooth = linspace(min(edge_mid), max(edge_mid), 200);
-            y = interp1(edge_mid, ampHist, xSmooth, 'cubic');
-            plot(xSmooth, y, "Color", colorsAll{kIndex}, "LineWidth", 2, "DisplayName", ['cluster ', num2str(kIndex)]);
+            histFit = interp1(edge_mid, ampHist, xSmooth, 'cubic');
+            plot(mAxe2, xSmooth, histFit, "Color", colorsAll{kIndex}, "LineWidth", 2, "DisplayName", ['cluster ', num2str(kIndex)]);
         end
 
-        legend;
-        xlabel("Spike amplitude (\muV)");
-        ylabel("Count");
-        xlim([min(edge), inf]);
-        ylim([0, inf]);
-        title("Spike amplitude distribution of each cluster");
+        legend(mAxe1, "Location", "best");
+        xlabel(mAxe1, "Time (sec)");
+        ylabel(mAxe1, "Spike amplitude (\muV)");
+        title(mAxe1, "Spike amplitude over time");
+        
+        legend(mAxe2, "Location", "best");
+        xlabel(mAxe2, "Spike amplitude (\muV)");
+        ylabel(mAxe2, "Count");
+        xlim(mAxe2, mAxe1.YLim);
+        ylim(mAxe2, [0, inf]);
+        title(mAxe2, "Spike amplitude distribution");
+        mAxe2.View = [90, 90];
+        mAxe2.XDir = "reverse";
     end
 
     return;
+end
+
+%% menuSelectedFcn
+function menuShowAndHideFcn(~, ~, Fig, mAxe1, mAxe2)
+    DTO = get(Fig, "UserData");
+    result = DTO.result;
+    colors = DTO.colors;
+    scaleFactor = DTO.scaleFactor;
+    K = result.K;
+    [idxShow, idxHide] = clusterIdxInput(getOr(DTO, "idxShow"), getOr(DTO, "idxHide"));
+
+    if isempty(idxShow)
+        idxShow = 1:K;
+    end
+
+    temp = 1:K;
+    idxShow = temp(ismember(temp, idxShow) & ~ismember(temp, idxHide));
+    idxHide = temp(~ismember(temp, idxShow));
+    DTO.idxShow = idxShow;
+    DTO.idxHide = idxHide;
+    set(Fig, "UserData", DTO);
+    cla(mAxe1);
+    cla(mAxe2);
+
+    colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(K / length(colors)) * length(colors), 1);
+    waveAmp = max(result.wave, [], 2) * scaleFactor; % uV
+    binSize = 5; % uV
+    edge = (floor(min(waveAmp) / binSize):ceil(max(waveAmp) / binSize)) * binSize;
+    edge_mid = edge - binSize / 2;
+    edge_mid(1) = edge_mid(1) + binSize / 2;
+
+    for kIndex = 1:K
+        idx = result.clusterIdx == kIndex & ismember(result.clusterIdx, idxShow);
+
+        if isempty(find(idx, 1))
+            continue;
+        end
+
+        scatter(mAxe1, result.spikeTimeAll(idx), waveAmp(idx), 30, "filled", "MarkerFaceColor", colorsAll{kIndex}, "DisplayName", ['cluster ', num2str(kIndex)]);
+        hold(mAxe1, "on");
+        
+        h = histogram(mAxe2, waveAmp(idx), "FaceColor", colorsAll{kIndex}, "FaceAlpha", 0.3, "BinEdges", edge);
+        set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');
+        hold(mAxe2, "on");
+
+        ampHist = [0, h.Values];
+        xSmooth = linspace(min(edge_mid), max(edge_mid), 200);
+        histFit = interp1(edge_mid, ampHist, xSmooth, 'cubic');
+        plot(mAxe2, xSmooth, histFit, "Color", colorsAll{kIndex}, "LineWidth", 2, "DisplayName", ['cluster ', num2str(kIndex)]);
+    end
+
+    xlim(mAxe2, mAxe1.YLim);
 end
