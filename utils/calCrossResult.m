@@ -2,7 +2,7 @@ function [crossResult, percentage, cv] = calCrossResult(sortResult, p)
     % Description: calculate cross result of SSE of each template on each cluster
     % Input:
     %     sortResult: a struct of mysort sorting result
-    %     p: prominence
+    %     p: prominence (default: 0.05)
     % Output:
     %     crossResult: a K*K cell array with clusters along rows and templates along columns
     %     percentage: a K*K double array with clusters along rows and templates along columns.
@@ -12,6 +12,12 @@ function [crossResult, percentage, cv] = calCrossResult(sortResult, p)
     %         After being normalized to N(0, 1), the sum of square value of points of each
     %         cluster will follow a standard chi-square distribution. cv is the critical value
     %         corresponding to the standard chi-square distribution at a prominence level of p.
+
+    narginchk(1, 2);
+
+    if nargin < 2
+        p = 0.05;
+    end
 
     K = sortResult.K;
     pca_temp = normalize([sortResult.pcaData; sortResult.clusterCenter], 1);

@@ -1,7 +1,7 @@
 function data = TDTDataConvertor(rawWave, fs, waveChan, spikeTime, spikeWaveform, spikeChan)
     narginchk(2, 6);
 
-    if nargin < 3
+    if nargin < 3 || isempty(waveChan)
         waveChan = (1:size(rawWave, 1))';
     end
 
