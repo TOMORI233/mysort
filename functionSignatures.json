@@ -1,0 +1,29 @@
+{
+    "_schemaVersion": "1.0.0",
+
+    "mysort": {
+        "inputs": [
+            {"name": "data", "kind": "required", "type": ["struct"]},
+            {"name": "channels", "kind": "ordered", "type": ["2d", "positive", "integer"]},
+            {"name": "thOpt", "kind": "ordered", "type": ["choices = {'origin', 'origin-reshape', 'reselect'}"]},
+            {"mutuallyExclusiveGroup": [
+                [
+                    {"name": "K", "kind": "ordered", "type": ["numeric", "positive", "numel=1"], "purpose": "k for kmeans"}
+                ],
+                [
+                    {"name": "method", "kind": "ordered", "type": ["char", "string", "choices={'gap', 'elbow', 'both', 'preview'}"], "purpose": "k selection method"}
+                ]
+            ]},
+            {"name": "sortOpts", "kind": "ordered", "type": ["struct"]}
+        ]
+    },
+
+    "batchSorting": {
+        "inputs": [
+            {"name": "waves", "kind": "required", "type": ["2d", "numeric"], "purpose": "[nCh, nSample]"},
+            {"name": "channels", "kind": "ordered", "type": ["2d", "positive", "integer"]},
+            {"name": "sortOpts", "kind": "ordered", "type": ["struct"]},
+            {"name": "Waveforms", "kind": "ordered", "type": ["2d", "numeric"], "purpose": "[nSpike, nWaveLen]"}
+        ]
+    }
+}

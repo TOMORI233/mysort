@@ -11,11 +11,13 @@ function [K, SSEs] = elbow_method(Data, KmeansOpts)
     %     K: optimum K value for K-means
     %     SSEs: SSE array for K values appointed by KmeansOpts.KArray
 
+    run("config\defaultConfig.m");
+    KmeansOpts = getOrFull(KmeansOpts, defaultKmeansOpts);
     SSEs = zeros(length(KmeansOpts.KArray), 1);
 
-    for index = 1:length(KmeansOpts.KArray)
+    parfor index = 1:length(KmeansOpts.KArray)
         % MATLAB - kmeans
-        [~, ~, sumd] = kmeans(Data, KmeansOpts.KArray(index), 'MaxIter', 100, 'Distance', 'sqeuclidean', 'Replicates', 2);
+        [~, ~, sumd] = kmeans(Data, KmeansOpts.KArray(index), 'MaxIter', KmeansOpts.maxIteration, 'Distance', 'sqeuclidean', 'Replicates', KmeansOpts.maxRepeat);
         % [~, ~, sumd] = mKmeans(Data, KmeansOpts.KArray(index), KmeansOpts);
         SSEs(index) = sum(sumd);
     end
@@ -24,7 +26,7 @@ function [K, SSEs] = elbow_method(Data, KmeansOpts)
     plot(KmeansOpts.KArray, SSEs, 'b.-', 'MarkerSize', 10);
     xlabel('K value');
     ylabel('SSE');
-    K = validateInput(["positive", "integer"], 'Input a K value (positive integer): ', [1, 1]);
+    K = validateInput('Input a K value (positive integer): ', @(x) validateattributes(x, "numeric", {'numel', 1, 'positive', 'integer'}));
 
     try
         close(Fig);

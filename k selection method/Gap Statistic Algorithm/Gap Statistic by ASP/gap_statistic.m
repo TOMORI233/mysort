@@ -77,7 +77,7 @@ function [opt_k, gaps] = gap_statistic(data, k_vector, n_tests, n_cores)
     %% Compute the gaps (Tibshirani, Walther & Hastie, 2001, p. 412)
     gaps(1:size_k(2)) = zeros;
 
-    for id_gap = k_vector;
+    for id_gap = k_vector
         gaps(id_gap) = log(mean(dispersions(2:n_tests + 1, id_gap))) - log(dispersions(1, id_gap));
     end
 
