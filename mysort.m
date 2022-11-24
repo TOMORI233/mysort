@@ -119,7 +119,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
                 ylabel('Voltage (V)');
                 xlim([reselectT0, reselectT0 + 10]); % show 10-sec wave
                 title(['Channel ', num2str(channels(cIndex))]);
-                sortOpts.th(cIndex) = validateInput("positive", ['Input th for channel ', num2str(channels(cIndex)), ' (unit: V): ']);
+                sortOpts.th(cIndex) = validateInput_beta("positive", ['Input th for channel ', num2str(channels(cIndex)), ' (unit: V): ']);
             end
             
         end

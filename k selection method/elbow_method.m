@@ -11,7 +11,7 @@ function [K, SSEs] = elbow_method(Data, KmeansOpts)
     %     K: optimum K value for K-means
     %     SSEs: SSE array for K values appointed by KmeansOpts.KArray
 
-    run("config\defaultConfig.m");
+    run("defaultConfig.m");
     KmeansOpts = getOrFull(KmeansOpts, defaultKmeansOpts);
     SSEs = zeros(length(KmeansOpts.KArray), 1);
 
@@ -26,6 +26,7 @@ function [K, SSEs] = elbow_method(Data, KmeansOpts)
     plot(KmeansOpts.KArray, SSEs, 'b.-', 'MarkerSize', 10);
     xlabel('K value');
     ylabel('SSE');
+    drawnow;
     K = validateInput('Input a K value (positive integer): ', @(x) validateattributes(x, "numeric", {'numel', 1, 'positive', 'integer'}));
 
     try

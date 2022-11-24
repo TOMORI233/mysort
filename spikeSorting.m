@@ -120,7 +120,7 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
                 xlabel('PC-1');
             end
 
-            K = validateInput(["non-negative", "integer"], 'Input a K value for K-means (zero for auto-searching): ');
+            K = validateInput_beta(["non-negative", "integer"], 'Input a K value for K-means (zero for auto-searching): ');
 
             if K == 0
                 % elbow method
