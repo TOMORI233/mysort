@@ -9,9 +9,44 @@
                 ],
                 [
                     {"name": "waveAmp", "kind": "required", "type": ["numeric"]},
-                    {"name": "spikeTimeAll", "kind": "required", "type": ["numeric"]}
+                    {"name": "spikeTimeAll", "kind": "required", "type": ["numeric"]},
+                    {"name": "clusterIdx", "kind": "required", "type": ["numeric", "vector", "nonnegative", "integer"]}
                 ]
             ]},
+            {"name": "visible", "kind": "namevalue", "type": ["choices={'on', 'off'}"]},
+            {"name": "colors", "kind": "namevalue", "type": ["cell"]}
+        ]
+    },
+
+    "plotPCA": {
+        "inputs": [
+            {"mutuallyExclusiveGroup": [
+                [
+                    {"name": "result", "kind": "required", "type": ["struct"], "purpose": "mysort result"}
+                ],
+                [
+                    {"name": "pcaData", "kind": "required", "type": ["numeric", "2d"], "purpose": "[sample, pcaData]"},
+                    {"name": "clusterIdx", "kind": "required", "type": ["numeric", "vector", "nonnegative", "integer"]}
+                ]
+            ]},
+            {"name": "PCShown", "kind": "ordered", "type": ["numeric", "vector", "positive", "integer"]},
+            {"name": "visible", "kind": "namevalue", "type": ["choices={'on', 'off'}"]},
+            {"name": "colors", "kind": "namevalue", "type": ["cell"]}
+        ]
+    },
+
+    "plotWave": {
+        "inputs": [
+            {"mutuallyExclusiveGroup": [
+                [
+                    {"name": "result", "kind": "required", "type": ["struct"], "purpose": "mysort result"}
+                ],
+                [
+                    {"name": "waveforms", "kind": "required", "type": ["numeric", "2d"], "purpose": "spike waveforms [sample, waveData]"},
+                    {"name": "clusterIdx", "kind": "required", "type": ["numeric", "vector", "nonnegative", "integer"]}
+                ]
+            ]},
+            {"name": "N", "kind": "ordered", "type": ["scalar", "positive", "integer"]},
             {"name": "visible", "kind": "namevalue", "type": ["choices={'on', 'off'}"]},
             {"name": "colors", "kind": "namevalue", "type": ["cell"]}
         ]
