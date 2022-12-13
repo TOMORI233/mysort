@@ -1,0 +1,20 @@
+{
+    "_schemaVersion": "1.0.0",
+
+    "plotSpikeAmp": {
+        "inputs": [
+            {"mutuallyExclusiveGroup": [
+                [
+                    {"name": "result", "kind": "required", "type": ["struct"], "purpose": "mysort result"}
+                ],
+                [
+                    {"name": "waveAmp", "kind": "required", "type": ["numeric"]},
+                    {"name": "spikeTimeAll", "kind": "required", "type": ["numeric"]}
+                ]
+            ]},
+            {"name": "visible", "kind": "namevalue", "type": ["choices={'on', 'off'}"]},
+            {"name": "colors", "kind": "namevalue", "type": ["cell"]}
+        ]
+    }
+
+}

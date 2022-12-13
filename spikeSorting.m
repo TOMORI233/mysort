@@ -1,8 +1,8 @@
 function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CVCRThreshold, KselectionMethod, KmeansOpts)
     % Description: use PCA and K-means for single channel spike sorting
     % Input:
-    %     Waveforms: each row is a spike waveform and each column is a sample point
-    %     CVCRThreshold: cumulative variance contribution rate threshold for principal components selection
+    %     Waveforms: each row is a spike waveform and each column is a time sample point
+    %     CVCRThreshold: cumulative variance contribution rate threshold for principal components selection (default: 0.9)
     %     KselectionMethod: method used to find an optimum K value for K-means
     %                       - "elbow": use elbow method
     %                       - "gap": use gap statistic (default)
@@ -54,7 +54,7 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
     % pcaData = S(:, 1:k);
 
     % MATLAB - pca
-    [coeff, SCORE, latent] = pca(Waveforms);
+    [~, SCORE, latent] = pca(Waveforms);
     explained = latent / sum(latent);
     contrib = 0;
 

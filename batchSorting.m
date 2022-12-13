@@ -169,6 +169,7 @@ function result = batchSorting(waves, channels, sortOpts, Waveforms)
         end
 
         result(cIndex).wave = data / scaleFactor;
+        result(cIndex).waveAmp = max(result(cIndex).wave, [], 2);
         result(cIndex).sortOpts = sortOpts;
 
         if isfield(sortOpts, "th")

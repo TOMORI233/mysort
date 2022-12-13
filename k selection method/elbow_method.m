@@ -16,18 +16,20 @@ function [K, SSEs] = elbow_method(Data, KmeansOpts)
     SSEs = zeros(length(KmeansOpts.KArray), 1);
 
     parfor index = 1:length(KmeansOpts.KArray)
+        % [~, ~, sumd] = mKmeans(Data, KmeansOpts.KArray(index), KmeansOpts);
+
         % MATLAB - kmeans
         [~, ~, sumd] = kmeans(Data, KmeansOpts.KArray(index), 'MaxIter', KmeansOpts.maxIteration, 'Distance', 'sqeuclidean', 'Replicates', KmeansOpts.maxRepeat);
-        % [~, ~, sumd] = mKmeans(Data, KmeansOpts.KArray(index), KmeansOpts);
+        
         SSEs(index) = sum(sumd);
     end
 
     Fig = figure;
-    plot(KmeansOpts.KArray, SSEs, 'b.-', 'MarkerSize', 10);
+    plot(KmeansOpts.KArray, SSEs, 'b.-', 'MarkerSize', 15, "LineWidth", 1.5);
     xlabel('K value');
     ylabel('SSE');
     drawnow;
-    K = validateInput('Input a K value (positive integer): ', @(x) validateattributes(x, "numeric", {'numel', 1, 'positive', 'integer'}));
+    K = validateInput('Input a K value (positive integer): ', @(x) validateattributes(x, "numeric", {'scalar', 'positive', 'integer'}));
 
     try
         close(Fig);
