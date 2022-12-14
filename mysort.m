@@ -130,7 +130,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
             disp(e);
         end
 
-        sortResult = batchSorting(waves, channels, sortOpts);
+        sortResult = batchSorting(waves, channels, sortOpts, "raw_wave");
     elseif strcmp(thOpt, "origin-reshape")
         %% Use Original Spikes for Waveform Extraction by user-specified wave length
         t = (0:size(waves, 2) - 1) / fs;
@@ -155,7 +155,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
         spikeTimeAll(channels == 0) = [];
         channels(channels == 0) = [];
         disp('Waveforms extraction done.');
-        sortResult = batchSorting([], channels, sortOpts, Waveforms);
+        sortResult = batchSorting(Waveforms, channels, sortOpts, "spike_wave");
 
         for cIndex = 1:length(sortResult)
             sortResult(cIndex).spikeTimeAll = spikeTimeAll(channels == sortResult(cIndex).chanIdx);
@@ -166,7 +166,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
         Waveforms = data.snips.eNeu.data * sortOpts.scaleFactor;
         channels = data.snips.eNeu.chan;
         spikeTimeAll = data.snips.eNeu.ts;
-        sortResult = batchSorting([], channels, sortOpts, Waveforms);
+        sortResult = batchSorting(Waveforms, channels, sortOpts, "spike_wave");
 
         for cIndex = 1:length(sortResult)
             sortResult(cIndex).spikeTimeAll = spikeTimeAll(channels == sortResult(cIndex).chanIdx);

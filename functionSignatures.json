@@ -20,10 +20,10 @@
 
     "batchSorting": {
         "inputs": [
-            {"name": "waves", "kind": "required", "type": ["2d", "numeric"], "purpose": "[nCh, nSample]"},
+            {"name": "waves", "kind": "required", "type": ["2d", "numeric"], "purpose": "raw wave:[channel,wave] or spike waveforms [spike,waveforms]"},
             {"name": "channels", "kind": "ordered", "type": ["2d", "positive", "integer"], "purpose": "channels to sort"},
             {"name": "sortOpts", "kind": "ordered", "type": ["struct"], "purpose": "full sorting options"},
-            {"name": "Waveforms", "kind": "ordered", "type": ["2d", "numeric"], "purpose": "[nSpike, nWaveLen]"}
+            {"name": "type", "kind": "ordered", "type": ["choices={'raw_wave', 'spike_wave'}"]}
         ]
     }
 
