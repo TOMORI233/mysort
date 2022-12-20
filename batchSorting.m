@@ -28,7 +28,7 @@ function result = batchSorting(waves, channels, sortOpts, type)
     %     result: a struct array, each element of which is a result of one channel(electrode), containing fields:
     %             - chanIdx: channel(electrode) number
     %             - wave: spike waveforms of this channel(electrode), samples along row
-    %             - waveAmp: spike amplitude vector
+    %             - spikeAmp: spike amplitude vector
     %             - sortOpts: sort settings
     %             - spikeTimeAll: spike time of raw wave data (if used), noise included
     %             - clusterIdx: cluster index of each spike waveform sample, with 0 as noise
@@ -99,35 +99,35 @@ function result = batchSorting(waves, channels, sortOpts, type)
                 
                 try
                     waveGPU = gpuArray(wave);
-                    [spikesAmpGPU, spikeIndexAllGPU] = findpeaks(waveGPU, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
-                    [spikesAmp, spikeIndexAll] = gather(spikesAmpGPU, spikeIndexAllGPU);
+                    [spikeAmpGPU, spikeIndexAllGPU] = findpeaks(waveGPU, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+                    [spikeAmp, spikeIndexAll] = gather(spikeAmpGPU, spikeIndexAllGPU);
                 catch
                     warning("GPU device unavailable. Using CPU...");
-                    [spikesAmp, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+                    [spikeAmp, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
                 end
     
-                if isempty(spikesAmp)
+                if isempty(spikeAmp)
                     warning(['No spikes detected in channel ', num2str(channels(cIndex))]);
                     continue;
                 end
     
-                meanSpikeAmp = mean(spikesAmp);
-                stdSpikeAmp = std(spikesAmp);
+                meanSpikeAmp = mean(spikeAmp);
+                stdSpikeAmp = std(spikeAmp);
     
                 % For this channel
                 nWaveLength = length(1 - floor(sortOpts.waveLength / 2 * fs):floor(sortOpts.waveLength / 2 * fs));
-                WaveformsTemp = zeros(length(spikesAmp), nWaveLength);
-                mChannelsTemp = zeros(length(spikesAmp), 1);
-                spikeIndexTemp = zeros(length(spikesAmp), 1);
+                WaveformsTemp = zeros(length(spikeAmp), nWaveLength);
+                mChannelsTemp = zeros(length(spikeAmp), 1);
+                spikeIndexTemp = zeros(length(spikeAmp), 1);
                 disp('Extracting Waveforms...');
     
-                for sIndex = 1:length(spikesAmp)
+                for sIndex = 1:length(spikeAmp)
     
                     % Ignore the beginning and the end of the wave
                     if spikeIndexAll(sIndex) - floor(waveLength / 2 * fs) > 0 && spikeIndexAll(sIndex) + floor(waveLength / 2 * fs) <= size(wave, 2)
     
                         % Exclude possible artifacts
-                        if spikesAmp(sIndex) <= meanSpikeAmp + 3 * stdSpikeAmp
+                        if spikeAmp(sIndex) <= meanSpikeAmp + 3 * stdSpikeAmp
                             WaveformsTemp(sIndex, :) = wave(spikeIndexAll(sIndex) - floor(waveLength / 2 * fs) + 1:spikeIndexAll(sIndex) + floor(waveLength / 2 * fs));
                             mChannelsTemp(sIndex) = channels(cIndex);
                             spikeIndexTemp(sIndex) = spikeIndexAll(sIndex);
@@ -137,7 +137,7 @@ function result = batchSorting(waves, channels, sortOpts, type)
     
                 end
     
-                disp(['Channel ', num2str(channels(cIndex)), ' done. nSpikes = ', num2str(length(spikesAmp))]);
+                disp(['Channel ', num2str(channels(cIndex)), ' done. nSpikes = ', num2str(length(spikeAmp))]);
                 WaveformsTemp(mChannelsTemp == 0, :) = [];
                 spikeIndexTemp(mChannelsTemp == 0) = [];
                 mChannelsTemp(mChannelsTemp == 0) = [];
@@ -165,10 +165,9 @@ function result = batchSorting(waves, channels, sortOpts, type)
         error('No channels specified');
     end
 
-    disp('Sorting...');
-
     % For each channel
     for cIndex = 1:length(channelUnique)
+        disp(['Sorting CH ', num2str(channelUnique(cIndex)), '...']);
         data = double(Waveforms(mChannels == channelUnique(cIndex), :));
 
         result(cIndex).chanIdx = channelUnique(cIndex);
@@ -178,7 +177,7 @@ function result = batchSorting(waves, channels, sortOpts, type)
         end
 
         result(cIndex).wave = data / scaleFactor;
-        result(cIndex).waveAmp = max(result(cIndex).wave, [], 2);
+        result(cIndex).spikeAmp = max(result(cIndex).wave, [], 2);
         result(cIndex).sortOpts = sortOpts;
 
         if isfield(sortOpts, "th")

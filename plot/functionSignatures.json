@@ -8,7 +8,7 @@
                     {"name": "result", "kind": "required", "type": ["struct"], "purpose": "mysort result"}
                 ],
                 [
-                    {"name": "waveAmp", "kind": "required", "type": ["numeric"]},
+                    {"name": "spikeAmp", "kind": "required", "type": ["numeric"]},
                     {"name": "spikeTimeAll", "kind": "required", "type": ["numeric"]},
                     {"name": "clusterIdx", "kind": "required", "type": ["numeric", "vector", "nonnegative", "integer"]}
                 ]
