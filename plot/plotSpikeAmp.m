@@ -84,7 +84,7 @@ function AmpFigs = plotSpikeAmp(varargin)
         end
 
         legend(mAxe1, "Location", "best");
-        xlabel(mAxe1, "Time");
+        xlabel(mAxe1, "Time (sec)");
         ylabel(mAxe1, "Spike amplitude");
         title(mAxe1, "Spike amplitude over time");
         
@@ -93,7 +93,6 @@ function AmpFigs = plotSpikeAmp(varargin)
         ylabel(mAxe2, "Count");
         xlim(mAxe2, mAxe1.YLim);
         ylim(mAxe2, [0, inf]);
-        title(mAxe2, "Spike amplitude distribution");
         mAxe2.View = [90, 90];
         mAxe2.XDir = "reverse";
     end

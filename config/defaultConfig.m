@@ -28,5 +28,6 @@ defaultKmeansOpts.KArray = 1:10;
 defaultKmeansOpts.maxIteration = 100;
 defaultKmeansOpts.maxRepeat = 3;
 defaultKmeansOpts.plotIterationNum = 0;
+defaultKmeansOpts.p_noise = 0.05;
 
 defaultSortOpts.KmeansOpts = defaultKmeansOpts;

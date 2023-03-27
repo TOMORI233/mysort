@@ -38,14 +38,7 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
         KselectionMethod = "gap";
     end
 
-    if nargin < 4
-        KmeansOpts = defaultKmeansOpts;
-    else
-        KmeansOpts.KArray = getOr(KmeansOpts, "KArray", defaultKmeansOpts.KArray);
-        KmeansOpts.maxIteration = getOr(KmeansOpts, "maxIteration", defaultKmeansOpts.maxIteration);
-        KmeansOpts.maxRepeat = getOr(KmeansOpts, "maxRepeat", defaultKmeansOpts.maxRepeat);
-        KmeansOpts.plotIterationNum = getOr(KmeansOpts, "plotIterationNum", defaultKmeansOpts.plotIterationNum);
-    end
+    KmeansOpts = getOrFull(KmeansOpts, defaultKmeansOpts);
 
     %% PCA
     disp('Performing PCA on Waveforms...');
@@ -120,6 +113,7 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
                 xlabel('PC-1');
             end
 
+            drawnow;
             K = validateInput_beta(["non-negative", "integer"], 'Input a K value for K-means (zero for auto-searching): ');
 
             if K == 0
@@ -152,15 +146,13 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
     % MATLAB - kmeans
     [idx, C, ~] = kmeans(pcaData, K, 'MaxIter', KmeansOpts.maxIteration, 'Distance', 'sqeuclidean', 'Replicates', KmeansOpts.maxRepeat, 'Options', statset('Display', 'final'));
 
-    % Possible noise of each cluster
+    % Exclude possible noise of each cluster
     temp = normalize([pcaData; mean(pcaData, 1)], 1);
     pcaData_norm = temp(1:end - 1, :);
     C_norm = temp(end, :);
     SSE_norm = sum((pcaData_norm - C_norm).^2, 2);
     noiseIdx = idx;
-
-    p = 0.05; % prominence
-    cv = chi2inv(1 - p, df); % critical value
+    cv = chi2inv(1 - KmeansOpts.p_noise, df); % critical value
     idx(SSE_norm > cv) = 0; % set normalized SSE > critical value of chi(df) as noise
     noiseIdx(SSE_norm <= cv) = 0;
 
