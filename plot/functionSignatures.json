@@ -5,7 +5,7 @@
         "inputs": [
             {"mutuallyExclusiveGroup": [
                 [
-                    {"name": "result", "kind": "required", "type": ["struct"], "purpose": "mysort result"}
+                    {"name": "sortResult", "kind": "required", "type": ["struct"], "purpose": "mysort result"}
                 ],
                 [
                     {"name": "spikeAmp", "kind": "required", "type": ["numeric"]},
@@ -22,7 +22,7 @@
         "inputs": [
             {"mutuallyExclusiveGroup": [
                 [
-                    {"name": "result", "kind": "required", "type": ["struct"], "purpose": "mysort result"}
+                    {"name": "sortResult", "kind": "required", "type": ["struct"], "purpose": "mysort result"}
                 ],
                 [
                     {"name": "pcaData", "kind": "required", "type": ["numeric", "2d"], "purpose": "[sample, pcaData]"},
@@ -39,7 +39,7 @@
         "inputs": [
             {"mutuallyExclusiveGroup": [
                 [
-                    {"name": "result", "kind": "required", "type": ["struct"], "purpose": "mysort result"}
+                    {"name": "sortResult", "kind": "required", "type": ["struct"], "purpose": "mysort result"}
                 ],
                 [
                     {"name": "waveforms", "kind": "required", "type": ["numeric", "2d"], "purpose": "spike waveforms [sample, waveData]"},

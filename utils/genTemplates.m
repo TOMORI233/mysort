@@ -1,18 +1,18 @@
-function [templates, clusterCenter] = genTemplates(result)
+function [templates, clusterCenter] = genTemplates(sortResult)
     % Description: compute mean value of waveforms and pca data of each cluster as templates
     % Input: 
-    %     result: mysort result struct
+    %     sortResult: mysort sortResult struct
     % Output:
     %     templates: waveform template of each cluster
     %     clusterCenter: mean pca data of each cluster
 
-    templates = zeros(result.K, size(result.wave, 2));
-    clusterCenter = zeros(result.K, size(result.pcaData, 2));
+    templates = zeros(sortResult.K, size(sortResult.wave, 2));
+    clusterCenter = zeros(sortResult.K, size(sortResult.pcaData, 2));
 
-    for cIndex = 1:result.K
-        idx = find(result.clusterIdx == cIndex);
-        waveforms = result.wave(idx, :);
-        pcaData = result.pcaData(idx, :);
+    for cIndex = 1:sortResult.K
+        idx = find(sortResult.clusterIdx == cIndex);
+        waveforms = sortResult.wave(idx, :);
+        pcaData = sortResult.pcaData(idx, :);
 
         if ~isempty(idx)
             templates(cIndex, :) = mean(waveforms);

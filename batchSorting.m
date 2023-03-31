@@ -1,4 +1,4 @@
-function result = batchSorting(waves, channels, sortOpts, type)
+function sortResult = batchSorting(waves, channels, sortOpts, type)
     % Description: batch sorting result for each channel(electrode)
     % Input:
     %     waves: 1. If type is set "raw_wave", input [waves] will be identified as raw wave data specified as [channels, waves].
@@ -25,7 +25,7 @@ function result = batchSorting(waves, channels, sortOpts, type)
     %                             - plotIterationNum: number of iterations to plot (default: 0)
     %                             - K: user-specified K. If left empty, an optimum K will be calculated and used (default: [])
     % Output:
-    %     result: a struct array, each element of which is a result of one channel(electrode), containing fields:
+    %     sortResult: a struct array, each element of which is a result of one channel(electrode), containing fields:
     %             - chanIdx: channel(electrode) number
     %             - wave: spike waveforms of this channel(electrode), samples along row
     %             - spikeAmp: spike amplitude vector
@@ -43,11 +43,11 @@ function result = batchSorting(waves, channels, sortOpts, type)
     %     % 1. Use raw wave data
     %     % waves is an m×N matrix, with channels along row and sampling points along column
     %     % channels is an m×1 column vector, which specifies the channel number of each wave sample
-    %     result = batchSorting(waves, channels, sortOpts);
+    %     sortResult = batchSorting(waves, channels, sortOpts);
     %     % 2. Use extracted waveforms
     %     % Waveforms is an M×n matrix, with channels along row and waveform points along column
     %     % channels is an M×1 column vector, which specifies the channel number of each waveform
-    %     result = batchSorting(Waveforms, channels, sortOpts, "spike_wave");
+    %     sortResult = batchSorting(Waveforms, channels, sortOpts, "spike_wave");
 
     warning on;
     narginchk(1, 4);
@@ -170,36 +170,36 @@ function result = batchSorting(waves, channels, sortOpts, type)
         disp(['Sorting CH ', num2str(channelUnique(cIndex)), '...']);
         data = double(Waveforms(mChannels == channelUnique(cIndex), :));
 
-        result(cIndex).chanIdx = channelUnique(cIndex);
+        sortResult(cIndex).chanIdx = channelUnique(cIndex);
 
         if isempty(data)
             continue;
         end
 
-        result(cIndex).wave = data / scaleFactor;
-        result(cIndex).spikeAmp = max(result(cIndex).wave, [], 2);
-        result(cIndex).sortOpts = sortOpts;
+        sortResult(cIndex).wave = data / scaleFactor;
+        sortResult(cIndex).spikeAmp = max(sortResult(cIndex).wave, [], 2);
+        sortResult(cIndex).sortOpts = sortOpts;
 
         if isfield(sortOpts, "th")
-            result(cIndex).th = sortOpts.th;
+            sortResult(cIndex).th = sortOpts.th;
         end
 
         if exist("spikeIndex", "var")
-            result(cIndex).spikeTimeAll = (spikeIndex{cIndex} - 1) / fs;
+            sortResult(cIndex).spikeTimeAll = (spikeIndex{cIndex} - 1) / fs;
         end
 
         % Perform single channel sorting
         [clusterIdx, SSEs, gaps, optimumK, pcaData, clusterCenter, noiseClusterIdx] = spikeSorting(data, CVCRThreshold, KselectionMethod, KmeansOpts);
 
-        result(cIndex).clusterIdx = clusterIdx;
-        result(cIndex).noiseClusterIdx = noiseClusterIdx;
-        result(cIndex).K = optimumK;
-        result(cIndex).KArray = KmeansOpts.KArray;
-        result(cIndex).SSEs = SSEs;
-        result(cIndex).gaps = gaps;
-        result(cIndex).pcaData = pcaData;
-        result(cIndex).clusterCenter = clusterCenter;
-        result(cIndex).templates = genTemplates(result(cIndex));
+        sortResult(cIndex).clusterIdx = clusterIdx;
+        sortResult(cIndex).noiseClusterIdx = noiseClusterIdx;
+        sortResult(cIndex).K = optimumK;
+        sortResult(cIndex).KArray = KmeansOpts.KArray;
+        sortResult(cIndex).SSEs = SSEs;
+        sortResult(cIndex).gaps = gaps;
+        sortResult(cIndex).pcaData = pcaData;
+        sortResult(cIndex).clusterCenter = clusterCenter;
+        sortResult(cIndex).templates = genTemplates(sortResult(cIndex));
 
         disp(['Channel ', num2str(channelUnique(cIndex)), ' sorting finished. nClusters = ', num2str(optimumK)]);
     end
