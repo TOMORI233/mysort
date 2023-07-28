@@ -24,21 +24,22 @@ function sortResult = batchSorting(waves, channels, sortOpts, type)
     %                             - maxRepeat: maximum number of times to repeat kmeans (default: 3)
     %                             - plotIterationNum: number of iterations to plot (default: 0)
     %                             - K: user-specified K. If left empty, an optimum K will be calculated and used (default: [])
+    %     type: "raw_wave" or "spike_wave"
     % Output:
     %     sortResult: a struct array, each element of which is a result of one channel(electrode), containing fields:
-    %             - chanIdx: channel(electrode) number
-    %             - wave: spike waveforms of this channel(electrode), samples along row
-    %             - spikeAmp: spike amplitude vector
-    %             - sortOpts: sort settings
-    %             - spikeTimeAll: spike time of raw wave data (if used), noise included
-    %             - clusterIdx: cluster index of each spike waveform sample, with 0 as noise
-    %             - noiseClusterIdx: cluster index of each noise waveform sample, with 0 as non-noise
-    %             - K: optimum K used in K-means
-    %             - KArray: possible K values
-    %             - SSEs: elbow method result
-    %             - gaps: gap statistic result
-    %             - pcaData: PCA result of spike waveforms
-    %             - clusterCenter: samples along row, in PCA space
+    %                 - chanIdx: channel(electrode) number
+    %                 - wave: spike waveforms of this channel(electrode), samples along row
+    %                 - spikeAmp: spike amplitude vector
+    %                 - sortOpts: sort settings
+    %                 - spikeTimeAll: spike time of raw wave data (if used), noise included
+    %                 - clusterIdx: cluster index of each spike waveform sample, with 0 as noise
+    %                 - noiseClusterIdx: cluster index of each noise waveform sample, with 0 as non-noise
+    %                 - K: optimum K used in K-means
+    %                 - KArray: possible K values
+    %                 - SSEs: elbow method result
+    %                 - gaps: gap statistic result
+    %                 - pcaData: PCA result of spike waveforms
+    %                 - clusterCenter: samples along row, in PCA space
     % Usage:
     %     % 1. Use raw wave data
     %     % waves is an m×N matrix, with channels along row and sampling points along column
