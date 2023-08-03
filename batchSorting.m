@@ -5,11 +5,14 @@ function sortResult = batchSorting(waves, channels, sortOpts, type)
     %            2. If type is set "spike_wave", input [waves] will be identified as spike wave specified as [spikes, waveforms].
     %               Waveforms are data from spikeTime - waveLength/2 to spikeTime + waveLength/2.
     %     channels: a channel(electrode) number column vector, each element specifies a channel(electrode) number for an entire wave.
-    %               If type is set "spike_wave", each element of channels specifies a channel number for each spike waveform.
-    %               If left empty or 0, all channels will be sorted.
+    %               If [type] is set "spike_wave", each element of [channels] specifies the channel
+    %               number of each spike waveform and size(channels,1)==size(waves,1).
+    %               If [type] is set "raw_wave" and [channels] is left empty or 0, all channels will
+    %               be sorted, otherwise size(channels,1)==size(waves,1).
     %     sortOpts: a sorting settings struct (if left empty, default settings will be used), containing:
     %               - th: threshold for spike extraction, in volts (default: [])
     %               - fs: sampling rate, in Hz (default: [], using fs of [data])
+    %                     If you use batchSorting only (instead of using mysort), you should specify [fs] here.
     %               - waveLength: waveform length, in sec (default: 1.5e-3)
     %               - scaleFactor: scale factor for waveforms (default: 1e+6)
     %               - CVCRThreshold: cumulative variance contribution rate threshold for principal components selection (default: 0.9)

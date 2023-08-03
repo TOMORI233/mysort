@@ -11,7 +11,13 @@ function [K, SSEs] = elbow_method(Data, KmeansOpts)
     %     K: optimum K value for K-means
     %     SSEs: SSE array for K values appointed by KmeansOpts.KArray
 
-    run("defaultConfig.m");
+    narginchk(1, 2);
+
+    if nargin < 2
+        KmeansOpts = [];
+    end
+
+    run(fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 1), "config", "defaultConfig.m"));
     KmeansOpts = getOrFull(KmeansOpts, defaultKmeansOpts);
     SSEs = zeros(length(KmeansOpts.KArray), 1);
 

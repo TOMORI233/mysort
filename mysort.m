@@ -4,7 +4,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     %     data: TDT Block data, specified as a struct
     %           It should at least contain streams.Wave or snips.eNeu
     %     channels: channels to sort, specified as a vector of channel numbers.
-    %               If left empty, all channels of Wave will be sorted. (default: [])
+    %               If left empty, all channels of data.streams.Wave will be sorted. (default: [])
     %     thOpt: "origin" | "origin-reshape" | "reselect"(default)
     %             - "origin": use spike waveform of input data
     %             - "origin-reshape": use original spike data but reshape waveforms by user-specified wave length
@@ -17,8 +17,9 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     %                                    - "both": use gap statistic but also return SSE result of elbow method
     %                                    - "preview": plot 3-D PCA data and use an input K from user
     %     sortOpts: a sorting settings struct (if left empty, default settings will be used), containing:
-    %               - th: threshold for spike extraction, in volts (default: [])
+    %               - th: a fixed threshold for spike extraction in reselect mode, in volts (default: [])
     %               - fs: sampling rate, in Hz (default: [], using fs of [data])
+    %                     If you use mysort for TDT data sorting, do not specify [fs] here.
     %               - waveLength: waveform length, in seconds (default: 1.5e-3)
     %               - scaleFactor: scale factor for waveforms (default: 1e+6)
     %               - CVCRThreshold: cumulative variance contribution rate threshold for principal components selection (default: 0.9)
@@ -27,7 +28,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
     %                                   - "gap": use gap statistic (default)
     %                                   - "both": use gap statistic but also return SSE result of elbow method
     %                                   - "preview": plot 3-D PCA data and use an input K from user
-    %               - reselectT0: for reselect mode (thOpt), starting time (in sec) of preview wave. (default: 0)
+    %               - reselectT0: for reselect mode, starting time (in sec) of preview wave. (default: 0)
     %               - KmeansOpts: kmeans settings, a struct containing:
     %                             - KArray: possible K values for K-means (default: 1:10)
     %                             - maxIteration: maximum number of iterations (default: 100)

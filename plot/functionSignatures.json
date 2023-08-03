@@ -10,7 +10,7 @@
                 [
                     {"name": "spikeAmp", "kind": "required", "type": ["numeric"]},
                     {"name": "spikeTimeAll", "kind": "required", "type": ["numeric"]},
-                    {"name": "clusterIdx", "kind": "required", "type": ["numeric", "vector", "nonnegative", "integer"]}
+                    {"name": "clusterIdx", "kind": "required", "type": ["numeric", "vector", ">=0", "integer"]}
                 ]
             ]},
             {"name": "visible", "kind": "namevalue", "type": ["choices={'on', 'off'}"]},
@@ -26,7 +26,7 @@
                 ],
                 [
                     {"name": "pcaData", "kind": "required", "type": ["numeric", "2d"], "purpose": "[sample, pcaData]"},
-                    {"name": "clusterIdx", "kind": "required", "type": ["numeric", "vector", "nonnegative", "integer"]}
+                    {"name": "clusterIdx", "kind": "required", "type": ["numeric", "vector", ">=0", "integer"]}
                 ]
             ]},
             {"name": "PCShown", "kind": "ordered", "type": ["numeric", "vector", "positive", "integer"]},
@@ -43,7 +43,7 @@
                 ],
                 [
                     {"name": "waveforms", "kind": "required", "type": ["numeric", "2d"], "purpose": "spike waveforms [sample, waveData]"},
-                    {"name": "clusterIdx", "kind": "required", "type": ["numeric", "vector", "nonnegative", "integer"]}
+                    {"name": "clusterIdx", "kind": "required", "type": ["numeric", "vector", ">=0", "integer"]}
                 ]
             ]},
             {"name": "N", "kind": "ordered", "type": ["scalar", "positive", "integer"]},

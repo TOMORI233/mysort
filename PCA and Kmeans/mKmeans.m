@@ -4,7 +4,6 @@ function [idx, C, sumd] = mKmeans(pcaData, K, KmeansOpts)
     %     pcaData: Data processed by PCA
     %     K: number of clusters
     %     KmeansOpts: kmeans settings, a struct containing:
-    %                 - KArray: possible K values for K-means
     %                 - maxIteration: maximum number of iterations
     %                 - maxRepeat: maximum number of times to repeat kmeans
     %                 - plotIterationNum: number of iterations to plot
@@ -12,6 +11,15 @@ function [idx, C, sumd] = mKmeans(pcaData, K, KmeansOpts)
     %     idx: array of cluster index of each sample
     %     C: cluster centers
     %     sumd: sum of inner Euclidean distance of each cluster
+
+    narginchk(2, 3);
+
+    if nargin < 3
+        KmeansOpts = [];
+    end
+
+    run(fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 1), "config", "defaultConfig.m"));
+    KmeansOpts = getOrFull(KmeansOpts, defaultKmeansOpts);
 
     [row, col] = size(pcaData); % row is number of samples, col is pca dimension
     idx = zeros(col, 1); % cluster index for all data
