@@ -12,22 +12,23 @@
 defaultSortOpts.waveLength = 1.5e-3; % ms
 
 % scale factor
-defaultSortOpts.scaleFactor = 1e6;
+defaultSortOpts.scaleFactor = 1e6; % scale wave
 
 % cumulative variance contribution rate threshold for principal components selection
-defaultSortOpts.CVCRThreshold = 0.9;
+defaultSortOpts.CVCRThreshold = 0.9; % for dimensionality reduction
 
 % k select method
 defaultSortOpts.KselectionMethod = "gap";
 
-% using reselect thOpt, start time of previewed wave
-defaultSortOpts.reselectT0 = 0;
+% wave preview for spike extraction (only work with thOpt as "reselect")
+defaultSortOpts.reselectT0 = 0; % start point, sec
+defaultSortOpts.reselectWindow = 200; % preview window, sec
 
 % KmeansOpts
-defaultKmeansOpts.KArray = 1:10;
+defaultKmeansOpts.KArray = 1:10; % for elbow method and gap statistics
 defaultKmeansOpts.maxIteration = 100;
 defaultKmeansOpts.maxRepeat = 3;
-defaultKmeansOpts.plotIterationNum = 0;
-defaultKmeansOpts.p_noise = 0.05;
+defaultKmeansOpts.plotIterationNum = 0; % only work with mKmeans (default: kmeans)
+defaultKmeansOpts.p_noise = 0.05; % for noise determination in a normalized chi distribution
 
 defaultSortOpts.KmeansOpts = defaultKmeansOpts;

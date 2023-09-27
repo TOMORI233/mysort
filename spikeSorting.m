@@ -42,11 +42,12 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
 
     %% PCA
     disp('Performing PCA on Waveforms...');
-    % default: use mPCA
+    % -------------default: use mPCA------------
     % [V, S, k] = mPCA(Waveforms, CVCRThreshold);
     % pcaData = S(:, 1:k);
+    % -------------END of mPCA------------------
 
-    % MATLAB - pca
+    % ---------------MATLAB pca-----------------
     [~, SCORE, latent] = pca(Waveforms);
     explained = latent / sum(latent);
     contrib = 0;
@@ -60,6 +61,7 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
         end
 
     end
+    % -----------END of MATLAB pca-------------
 
     nSpikes = size(pcaData, 1);
     df = size(pcaData, 2); % degree of freedom
