@@ -116,7 +116,7 @@ function selectedIdx = recluster(sortResult, PCShown, colors)
 end
 
 %% MenuSelectedFcn
-function menuPlaceFcn(handle, eventdata, Fig)
+function menuPlaceFcn(~, ~, Fig)
     mAxe = gca;
     menus = mAxe.ContextMenu.Children;
     menus = [menus; menus(3).Children];
@@ -131,11 +131,11 @@ function menuPlaceFcn(handle, eventdata, Fig)
     set(menus, "Enable", "on");
 end
 
-function menuConfirmFcn(handle, eventdata, Fig)
+function menuConfirmFcn(~, ~, Fig)
     uiresume(Fig);
 end
 
-function menuViewFcn(handle, eventdata, Fig, opt)
+function menuViewFcn(~, ~, Fig, opt)
     DTO = get(Fig, "UserData");
     sortResult = DTO.sortResult;
     selectedIdx = inpolygon(sortResult.pcaData(:, DTO.PCx), sortResult.pcaData(:, DTO.PCy), DTO.xv, DTO.yv);
@@ -155,7 +155,7 @@ function menuViewFcn(handle, eventdata, Fig, opt)
     end
 end
 
-function menuChangePCFcn(handle, eventdata, Fig)
+function menuChangePCFcn(~, ~, Fig)
     DTO = get(Fig, "UserData");
     sortResult = DTO.sortResult;
     colors = DTO.colors;

@@ -75,8 +75,8 @@ function PCAFigs = plotPCA(varargin)
         Ks = unique(sortResult(eIndex).clusterIdx);
         Ks(Ks == 0) = [];
 
-        for index = 1:length(Ks)
-            idx = sortResult(eIndex).clusterIdx == Ks(index);
+        for kIndex = 1:length(Ks)
+            idx = sortResult(eIndex).clusterIdx == Ks(kIndex);
             x = sortResult(eIndex).pcaData(idx, PCx);
             y = sortResult(eIndex).pcaData(idx, PCy);
 
@@ -88,12 +88,12 @@ function PCAFigs = plotPCA(varargin)
 
             if ~isempty(PCz)
                 z = sortResult(eIndex).pcaData(idx, PCz);
-                plot3(x, y, z, '.', 'MarkerSize', 12, 'Color', colorsAll{index}, 'DisplayName', ['cluster ' num2str(index)]); hold on;
+                plot3(x, y, z, '.', 'MarkerSize', 12, 'Color', colorsAll{kIndex}, 'DisplayName', ['cluster ' num2str(kIndex)]); hold on;
                 h = plot3(mean(x), mean(y), mean(z), 'kh', 'LineWidth', 1.2, 'MarkerSize', 15);
                 grid on;
                 zlabel(['PC-' num2str(PCz)]);
             else
-                plot(x, y, '.', 'MarkerSize', 12, 'Color', colorsAll{index}, 'DisplayName', ['cluster ' num2str(index)]); hold on;
+                plot(x, y, '.', 'MarkerSize', 12, 'Color', colorsAll{kIndex}, 'DisplayName', ['cluster ' num2str(kIndex)]); hold on;
                 h = plot(mean(x), mean(y), 'kx', 'LineWidth', 1.2, 'MarkerSize', 15);
             end
 

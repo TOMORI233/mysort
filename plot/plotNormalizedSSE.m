@@ -44,6 +44,7 @@ function Figs = plotNormalizedSSE(sortResult, visibilityOpt, colors)
 
             title(['cluster ', num2str(t1)]);
             xlabel('Normalized SSE of PCA data and cluster centers');
+            ylabel('Spike count');
             yRange = get(gca, "YLim");
 
             if ~isempty(crossResult{t1, t2})

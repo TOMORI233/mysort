@@ -87,6 +87,8 @@ function AmpFigs = plotSpikeAmp(varargin)
         xlabel(mAxe1, "Time (sec)");
         ylabel(mAxe1, "Spike amplitude");
         title(mAxe1, "Spike amplitude over time");
+        mAxe1.XLimitMethod = "tight";
+        mAxe1.YLimitMethod = "tight";
         
         legend(mAxe2, "Location", "best");
         xlabel(mAxe2, "Spike amplitude");
@@ -95,6 +97,7 @@ function AmpFigs = plotSpikeAmp(varargin)
         ylim(mAxe2, [0, inf]);
         mAxe2.View = [90, 90];
         mAxe2.XDir = "reverse";
+        mAxe2.XLimitMethod = "tight";
     end
 
     return;
