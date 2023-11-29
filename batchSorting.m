@@ -99,6 +99,7 @@ function sortResult = batchSorting(waves, channels, sortOpts, type)
             % For each channel
             for cIndex = 1:length(channels)
                 wave = waves(channels(cIndex), :);
+                wave = mysortFilter(wave, fs);
                 disp('Extracting spikes...');
                 
                 try
