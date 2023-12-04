@@ -17,11 +17,8 @@ function datr = mysortFilter(data, fs)
     % subtract the mean from each channel
     data = data - mean(data, 1); % subtract mean of each channel
     
-    % next four lines should be equivalent to filtfilt (which cannot be used because it requires float64)
-    datr = filter(b1, a1, data); % causal forward filter
-    datr = flipud(datr); % reverse time
-    datr = filter(b1, a1, datr); % causal forward filter again
-    datr = flipud(datr); % reverse time back
+    % filter data with a zero-phase digital filter
+    datr = filtfilt(b1, a1, data);
 
     if a < b
         datr = datr';
