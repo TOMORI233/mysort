@@ -13,10 +13,7 @@ function Figs = plotSSEorGap(sortResult, visibilityOpt)
     end
 
     for eIndex = 1:length(sortResult)
-        Figs(eIndex) = figure;
-        % set(Fig, "outerposition", get(0, "screensize"));
-        maximizeFig(Figs);
-        set(Figs, "Visible", visibilityOpt);
+        Figs(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
 
         x = min([size(sortResult(eIndex).pcaData, 1) min(sortResult(eIndex).KArray)]):min([size(sortResult(eIndex).pcaData, 1) max(sortResult(eIndex).KArray)]);
 
@@ -24,7 +21,7 @@ function Figs = plotSSEorGap(sortResult, visibilityOpt)
             yyaxis left
             plot(x, sortResult(eIndex).gaps, 'b-o', 'LineWidth', 2, 'DisplayName', 'Gap');
             ylabel('Gaps');
-        catch exception1
+        catch
             disp('Gaps data is empty.');
         end
 
@@ -32,7 +29,7 @@ function Figs = plotSSEorGap(sortResult, visibilityOpt)
             yyaxis right
             plot(x, sortResult(eIndex).SSEs, 'r-o', 'LineWidth', 2, 'DisplayName', 'SSE');
             ylabel('Sum of SSE');
-        catch exception2
+        catch
             disp('SSEs data is empty.');
         end
 

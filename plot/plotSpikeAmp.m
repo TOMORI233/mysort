@@ -1,4 +1,4 @@
-function AmpFigs = plotSpikeAmp(varargin)
+function FigsAmp = plotSpikeAmp(varargin)
     % plotSpikeAmp(sortResult)
     % plotSpikeAmp(spikeAmp, spikeTimeAll, clusterIdx)
     % plotSpikeAmp(..., "visible", visibilityOpt, "colors", colors)
@@ -36,27 +36,25 @@ function AmpFigs = plotSpikeAmp(varargin)
 
     visibilityOpt = mIp.Results.visible;
     colors = mIp.Results.colors;
+    paddings = [0.05, 0.05, 0.05, 0.05];
 
     for eIndex = 1:length(sortResult)
         % Plot
-        AmpFigs(eIndex) = figure;
-        maximizeFig(AmpFigs(eIndex));
-        set(AmpFigs(eIndex), "Visible", visibilityOpt);
+        FigsAmp(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
 
-        paddings = [0.05, 0.05, 0.05, 0.05];
-        mAxe1 = mSubplot(AmpFigs(eIndex), 1, 1, 1, [0.8, 1], "alignment", "center-left", "margin_left", 0, "paddings", paddings);
-        mAxe2 = mSubplot(AmpFigs(eIndex), 1, 1, 1, [0.15, 1], "alignment", "center-right", "margin_right", 0, "paddings", paddings);
+        mAxe1 = mSubplot(FigsAmp(eIndex), 1, 1, 1, [0.8, 1], "alignment", "center-left", "margin_left", 0, "paddings", paddings);
+        mAxe2 = mSubplot(FigsAmp(eIndex), 1, 1, 1, [0.15, 1], "alignment", "center-right", "margin_right", 0, "paddings", paddings);
 
-        cm = uicontextmenu(AmpFigs(eIndex));
+        cm = uicontextmenu(FigsAmp(eIndex));
         mAxe1.ContextMenu = cm;
         mAxe2.ContextMenu = cm;
     
         m1 = uimenu(cm, 'Text', 'Show & Hide');
-        set(m1, "MenuSelectedFcn", {@menuShowAndHideFcn, AmpFigs(eIndex), mAxe1, mAxe2});
+        set(m1, "MenuSelectedFcn", {@menuShowAndHideFcn, FigsAmp(eIndex), mAxe1, mAxe2});
 
         DTO.sortResult = sortResult(eIndex);
         DTO.colors = colors;
-        set(AmpFigs(eIndex), "UserData", DTO);
+        set(FigsAmp(eIndex), "UserData", DTO);
 
         Ks = unique(sortResult(eIndex).clusterIdx);
         Ks(Ks == 0) = [];

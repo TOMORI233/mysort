@@ -52,11 +52,7 @@ function PCAFigs = plotPCA(varargin)
     end
 
     for eIndex = 1:length(sortResult)
-        PCAFigs(eIndex) = figure;
-        % set(Fig, "outerposition", get(0, "screensize"));
-        maximizeFig(PCAFigs(eIndex));
-        set(PCAFigs(eIndex), "Visible", visibilityOpt);
-
+        PCAFigs(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
         mAxe = mSubplot(PCAFigs(eIndex), 1, 1, 1, 1, [0, 0, 0, 0], [0.1, 0.1, 0.1, 0.1]);
 
         cm = uicontextmenu(PCAFigs(eIndex));

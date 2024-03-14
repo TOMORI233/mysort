@@ -23,9 +23,7 @@ function Figs = plotNormalizedSSE(sortResult, visibilityOpt, colors)
         K = sortResult(eIndex).K;
 
         % Plot
-        Figs(eIndex) = figure;
-        maximizeFig(Figs(eIndex));
-        set(Figs(eIndex), "Visible", visibilityOpt);
+        Figs(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
 
         plotCol = 2;
         colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(K / length(colors)) * length(colors), 1);

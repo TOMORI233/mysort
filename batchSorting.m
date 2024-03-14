@@ -100,7 +100,7 @@ function sortResult = batchSorting(waves, channels, sortOpts, type)
             for cIndex = 1:length(channels)
                 disp('Applying highpass filter...');
                 wave = waves(channels(cIndex), :);
-                wave = mysortFilter(wave, fs);
+                wave = mysortFilter(double(wave), fs);
                 
                 disp('Extracting spikes...');
                 

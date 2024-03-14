@@ -1,4 +1,4 @@
-function [waveFigs, templateFigs] = plotWave(varargin)
+function [FigsWave, FigsTemplate] = plotWave(varargin)
     % plotWave(sortResult)
     % plotWave(waveforms, clusterIdx)
     % plotWave(..., N)
@@ -43,21 +43,16 @@ function [waveFigs, templateFigs] = plotWave(varargin)
     colors = mIp.Results.colors;
     N = mIp.Results.N;
 
+    plotCol = 2;
+
     for eIndex = 1:length(sortResult)
 
         if ~isempty(sortResult(eIndex).clusterIdx)
-            waveFigs(eIndex) = figure;
-            % set(Fig, "outerposition", get(0, "screensize"));
-            maximizeFig(waveFigs(eIndex));
-            set(waveFigs(eIndex), "Visible", visibilityOpt);
-
-            plotCol = 2;
+            FigsWave(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
 
             sortResult(eIndex).templates = getOr(sortResult(eIndex), "templates", genTemplates(sortResult(eIndex)));
             templates = [mean(sortResult(eIndex).wave(sortResult(eIndex).clusterIdx == 0, :), 1); genTemplates(sortResult(eIndex))];
             Ks = unique(sortResult(eIndex).clusterIdx);
-            Ks(Ks == 0) = [];
-            Ks = [0; Ks];
 
             % Waveforms of each cluster
             for kIndex = 1:length(Ks)
@@ -66,7 +61,7 @@ function [waveFigs, templateFigs] = plotWave(varargin)
                 if ~isempty(plotData)
                     stdValue = std(plotData, 0, 1);
 
-                    mSubplot(waveFigs(eIndex), ceil(length(Ks) / plotCol), plotCol, kIndex, [1, 1], [0.05, 0.05, 0.1, 0.1]);
+                    mSubplot(FigsWave(eIndex), ceil(length(Ks) / plotCol), plotCol, kIndex, [1, 1], [0.05, 0.05, 0.1, 0.1]);
                     x = 1:size(plotData, 2);
                     xSmooth = linspace(min(x), max(x));
                     yMin = min(sortResult(eIndex).wave(sortResult(eIndex).clusterIdx ~= 0, :), [], "all");
@@ -86,7 +81,7 @@ function [waveFigs, templateFigs] = plotWave(varargin)
                     if size(plotData, 1) > 1
                         y1 = interp1(x, templates(kIndex, :) + stdValue, xSmooth, 'cubic');
                         y2 = interp1(x, templates(kIndex, :) - stdValue, xSmooth, 'cubic');
-                        fill([xSmooth fliplr(xSmooth)], [y1 fliplr(y2)], [230, 230, 230] / 255, 'edgealpha', '0', 'facealpha', '.6', 'DisplayName', 'Error bar');
+                        fill([xSmooth fliplr(xSmooth)], [y1 fliplr(y2)], [230, 230, 230] / 255, 'edgealpha', 0, 'facealpha', 0.6, 'DisplayName', 'Error bar');
                         plot(xSmooth, interp1(x, templates(kIndex, :), xSmooth, 'cubic'), 'r', 'LineWidth', 2, 'DisplayName', 'Mean');
                     end
 
@@ -104,9 +99,8 @@ function [waveFigs, templateFigs] = plotWave(varargin)
             end
 
             %Template of each cluster
-            templateFigs(eIndex) = figure;
-            maximizeFig(templateFigs(eIndex));
-            set(templateFigs(eIndex), "Visible", visibilityOpt);
+            FigsTemplate(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
+
             waveLen = size(templates, 2);
             x = (1:waveLen) - floor(waveLen / 2);
             colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil((length(Ks) - 1) / length(colors)) * length(colors), 1);
