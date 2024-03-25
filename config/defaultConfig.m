@@ -12,10 +12,10 @@
 defaultSortOpts.waveLength = 1.5e-3; % ms
 
 % scale factor
-defaultSortOpts.scaleFactor = 1e6; % scale wave
+defaultSortOpts.scaleFactor = 1e6; % to scale wave
 
 % cumulative variance contribution rate threshold for principal components selection
-defaultSortOpts.CVCRThreshold = 0.9; % for dimensionality reduction
+defaultSortOpts.CVCRThreshold = 0.9; % percentage of information to reserve,  for dimensionality reduction
 
 % k select method
 defaultSortOpts.KselectionMethod = "gap";
@@ -30,5 +30,6 @@ defaultKmeansOpts.maxIteration = 100;
 defaultKmeansOpts.maxRepeat = 3;
 defaultKmeansOpts.plotIterationNum = 0; % only work with mKmeans (default: kmeans)
 defaultKmeansOpts.p_noise = 0.05; % for noise determination in a normalized chi distribution
+defaultKmeansOpts.K = []; % user-specified K value
 
 defaultSortOpts.KmeansOpts = defaultKmeansOpts;

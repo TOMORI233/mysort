@@ -2,8 +2,8 @@ function sortResult = batchSorting(waves, channels, sortOpts, type)
 % Description: batch sorting result for each channel(electrode)
 % Input:
 %     waves: 1. If type is set "raw_wave", input [waves] will be identified as raw wave data specified as [channels, waves].
-%            2. If type is set "spike_wave", input [waves] will be identified as spike wave specified as [spikes, waveforms].
-%               Waveforms are data from spikeTime - waveLength/2 to spikeTime + waveLength/2.
+%            2. If type is set "spike_wave", input [waves] will be identified as spike waveform specified as [spikes, waveforms].
+%               Waveforms are data from [spikeTime]-[waveLength]/2 to [spikeTime]+[waveLength]/2.
 %     channels: a channel(electrode) number column vector, each element specifies a channel(electrode) number for an entire wave.
 %               If [type] is set "spike_wave", each element of [channels] specifies the channel
 %               number of each spike waveform and size(channels,1)==size(waves,1).
@@ -26,7 +26,9 @@ function sortResult = batchSorting(waves, channels, sortOpts, type)
 %                             - maxIteration: maximum number of iterations (default: 100)
 %                             - maxRepeat: maximum number of times to repeat kmeans (default: 3)
 %                             - plotIterationNum: number of iterations to plot (default: 0)
-%                             - K: user-specified K. If left empty, an optimum K will be calculated and used (default: [])
+%                             - p_noise: for noise determination in a normalized chi distribution (default: 0.05)
+%                             - K: user-specified K (prior to KselectionMethod)
+%                                  If left empty, an optimum K will be calculated and used (default: [])
 %     type: "raw_wave" or "spike_wave"
 % Output:
 %     sortResult: a struct array, each element of which is a result of one channel(electrode), containing fields:

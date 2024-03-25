@@ -13,7 +13,9 @@ function [idx, SSEs, gaps, K, pcaData, C, noiseIdx] = spikeSorting(Waveforms, CV
 %                 - maxIteration: maximum number of iterations (default: 100)
 %                 - maxRepeat: maximum number of times to repeat kmeans (default: 3)
 %                 - plotIterationNum: number of iterations to plot (default: 0)
-%                 - K: user-specified K. If left empty, an optimum K will be calculated and used (default: [])
+%                 - p_noise: for noise determination in a normalized chi distribution (default: 0.05)
+%                 - K: user-specified K (prior to KselectionMethod)
+%                      If left empty, an optimum K will be calculated and used (default: [])
 % Output:
 %     idx: cluster index of each sample, with 0 as noise
 %     SSEs: by elbow method
@@ -28,7 +30,6 @@ narginchk(1, 4);
 addpath(genpath(fileparts(mfilename('fullpath'))));
 
 run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
-defaultKmeansOpts = defaultSortOpts.KmeansOpts;
 
 if nargin < 2
     CVCRThreshold = 0.9;

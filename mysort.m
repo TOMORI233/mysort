@@ -25,7 +25,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
 %               - waveLength: waveform length, in seconds (default: 1.5e-3)
 %               - scaleFactor: scale factor for waveforms (default: 1e+6)
 %               - CVCRThreshold: cumulative variance contribution rate threshold for principal components selection (default: 0.9)
-%               - KselectionMethod
+%               - KselectionMethod (prior to [KorMethod], do not specify here)
 %               - reselectT0: for reselect mode, start point (in sec, default: 0)
 %               - reselectWindow: for reselect mode, preview window (in sec, default: 200)
 %               - KmeansOpts: kmeans settings, a struct containing:
@@ -33,7 +33,8 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
 %                             - maxIteration: maximum number of iterations (default: 100)
 %                             - maxRepeat: maximum number of times to repeat kmeans (default: 3)
 %                             - plotIterationNum: number of iterations to plot (default: 0)
-%                             - K: user-specified K. If left empty, an optimum K will be calculated and used (default: [])
+%                             - p_noise: for noise determination in a normalized chi distribution (default: 0.05)
+%                             - K: user-specified K (prior to KorMethod, do not specify here)
 % Output:
 %     sortResult: a struct array, each element of which is a result of one channel(electrode), containing fields:
 %                 - chanIdx: channel(electrode) number
@@ -44,7 +45,7 @@ function sortResult = mysort(data, channels, thOpt, KorMethod, sortOpts)
 %                 - spikeTimeAll: spike time of raw wave data (if used), noise included. (unit: sec)
 %                 - clusterIdx: cluster index of each spike waveform sample, with 0 as noise
 %                 - noiseClusterIdx: cluster index of each noise waveform sample, with 0 as non-noise
-%                 - K: optimum K used in K-means
+%                 - K: optimum K used in K-means or user-specified K
 %                 - KArray: possible K values
 %                 - SSEs: elbow method result
 %                 - gaps: gap statistic result
