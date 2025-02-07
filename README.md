@@ -16,7 +16,7 @@ Before you start using `mysort`, you should first download `MATLABUtils` and add
 git clone git@github.com:TOMORI233/MATLABUtils.git
 ```
 
-The latest supported version is MATLAB 2019b.
+The earliest supported version is MATLAB 2019b.
 
 #### 2.1 Mysort
 
