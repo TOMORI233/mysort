@@ -125,17 +125,18 @@ sortResult1 = templateMatching(data1, sortResult0);
 % Specify your own sorting options
 run('defaultConfig.m');
 sortOpts = defaultSortOpts;
+% TODO: modify parameters here
 
 % 1. Use raw wave data
 % waves is an m*n matrix, with channels along row and sampling points along column
 % channels is an m*1 column vector, which specifies the channel number of each wave sample
-result = batchSorting(waves, channels, sortOpts);
+result = batchSorting(waves, channels, sortOpts, "raw_wave");
 
 % Or
 % 2. Use extracted waveforms
 % Waveforms is an m*n matrix, with channels along row and waveform points along column
 % channels is an m*1 column vector, which specifies the channel number of each waveform
-result = batchSorting([], channels, sortOpts, Waveforms);
+result = batchSorting(Waveforms, channels, sortOpts, "spike_wave")
 ```
 
 #### 2.4 Re-cluster

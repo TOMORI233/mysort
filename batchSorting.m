@@ -102,7 +102,7 @@ switch type
         for cIndex = 1:length(channels)
             disp('Applying highpass filter...');
             wave = waves(channels(cIndex), :);
-            wave = mysortFilter(double(wave), fs);
+            wave = mFilter(double(wave), fs, "fhp", 300, "fnotch", 50);
 
             disp('Extracting spikes...');
 
