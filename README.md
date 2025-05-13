@@ -164,6 +164,7 @@ result = batchSorting(waves, channels, sortOpts, "raw_wave");
 % Waveforms is an m*n matrix, with channels along row and waveform points along column
 % channels is an m*1 column vector, which specifies the channel number of each waveform
 result = batchSorting(Waveforms, channels, sortOpts, "spike_wave")
+```
 
 #### 2.4 Re-cluster
 
