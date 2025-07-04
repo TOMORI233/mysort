@@ -9,7 +9,7 @@
 % defaultSortOpts.th = 1e-5; % V
 
 % wave length
-defaultSortOpts.waveLength = 1.5e-3; % ms
+defaultSortOpts.waveLength = 1.5e-3; % sec
 
 % scale factor
 defaultSortOpts.scaleFactor = 1e6; % to scale wave

@@ -49,9 +49,14 @@ function [FigsWave, FigsTemplate] = plotWave(varargin)
 
         if ~isempty(sortResult(eIndex).clusterIdx)
             FigsWave(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
+            clearvars ax
 
             sortResult(eIndex).templates = getOr(sortResult(eIndex), "templates", genTemplates(sortResult(eIndex)));
-            templates = [mean(sortResult(eIndex).wave(sortResult(eIndex).clusterIdx == 0, :), 1); genTemplates(sortResult(eIndex))];
+            if any(sortResult(eIndex).wave(sortResult(eIndex).clusterIdx == 0))
+                templates = [mean(sortResult(eIndex).wave(sortResult(eIndex).clusterIdx == 0, :), 1); genTemplates(sortResult(eIndex))];
+            else
+                templates = genTemplates(sortResult(eIndex));
+            end
             Ks = unique(sortResult(eIndex).clusterIdx);
 
             % Waveforms of each cluster
@@ -61,11 +66,9 @@ function [FigsWave, FigsTemplate] = plotWave(varargin)
                 if ~isempty(plotData)
                     stdValue = std(plotData, 0, 1);
 
-                    mSubplot(FigsWave(eIndex), ceil(length(Ks) / plotCol), plotCol, kIndex, [1, 1], [0.05, 0.05, 0.1, 0.1]);
+                    ax(kIndex) = mSubplot(FigsWave(eIndex), ceil(length(Ks) / plotCol), plotCol, kIndex, [1, 1], [0.05, 0.05, 0.1, 0.1]);
                     x = 1:size(plotData, 2);
                     xSmooth = linspace(min(x), max(x));
-                    yMin = min(sortResult(eIndex).wave(sortResult(eIndex).clusterIdx ~= 0, :), [], "all");
-                    yMax = max(sortResult(eIndex).wave(sortResult(eIndex).clusterIdx ~= 0, :), [], "all");
 
                     for pIndex = 1:min([N, size(plotData, 1)])
                         y = interp1(x, plotData(pIndex, :), xSmooth, 'cubic');
@@ -87,7 +90,6 @@ function [FigsWave, FigsTemplate] = plotWave(varargin)
 
                     if Ks(kIndex) > 0
                         title(['Channel: ' num2str(sortResult(eIndex).chanIdx) ' | nSamples = ' num2str(size(plotData, 1)) ' | cluster ' num2str(Ks(kIndex))]);
-                        ylim([yMin yMax]);
                     else
                         title(['Channel: ' num2str(sortResult(eIndex).chanIdx) ' | nSamples = ' num2str(size(plotData, 1)) ' | noise']);
                     end
@@ -97,16 +99,18 @@ function [FigsWave, FigsTemplate] = plotWave(varargin)
                 end
 
             end
+            scaleAxes(ax(Ks ~= 0), "y", "on");
 
             %Template of each cluster
             FigsTemplate(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
-
+            templates(Ks == 0, :) = [];
+            Ks(Ks == 0) = [];
             waveLen = size(templates, 2);
             x = (1:waveLen) - floor(waveLen / 2);
-            colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil((length(Ks) - 1) / length(colors)) * length(colors), 1);
+            colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(length(Ks) / length(colors)) * length(colors), 1);
 
-            for kIndex = 2:length(Ks)
-                plot(x, templates(kIndex, :), "Color", colorsAll{kIndex - 1}, "LineWidth", 2, "DisplayName", ['cluster ', num2str(Ks(kIndex))]); hold on;
+            for kIndex = 1:length(Ks)
+                plot(x, templates(kIndex, :), "Color", colorsAll{kIndex}, "LineWidth", 2, "DisplayName", ['cluster ', num2str(Ks(kIndex))]); hold on;
             end
 
             legend;
