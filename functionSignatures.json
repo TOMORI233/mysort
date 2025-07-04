@@ -3,7 +3,7 @@
 
     "mysort": {
         "inputs": [
-            {"name": "data", "kind": "required", "type": ["struct"]},
+            {"name": "data", "kind": "required", "type": ["struct", "scalar"]},
             {"name": "channels", "kind": "ordered", "type": ["2d", "positive", "integer"], "purpose": "channels to sort"},
             {"name": "thOpt", "kind": "ordered", "type": ["choices = {'origin', 'origin-reshape', 'reselect'}"], "purpose": "threshold selection method"},
             {"mutuallyExclusiveGroup": [
