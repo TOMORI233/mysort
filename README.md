@@ -10,10 +10,10 @@ This sorting method is simply based on PCA and K-means.
 
 ### 2. Instructions
 
-Before you start using `mysort`, you should first download `MATLABUtils` and add it to your matlab path.
+Before you start using `mysort`, you should first download `MATLAB-Utils` and add it to your matlab path.
 
 ```git
-git clone git@github.com:TOMORI233/MATLABUtils.git
+git clone git@github.com:Yulab-ZJU/MATLAB-Utils.git
 ```
 
 The earliest supported version is MATLAB 2019b.

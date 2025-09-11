@@ -88,16 +88,16 @@ waves = data.streams.Wave.data;
 
 %% Params Settings
 run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
-sortOpts = getOrFull(sortOpts, defaultSortOpts);
-sortOpts.KmeansOpts = getOrFull(sortOpts.KmeansOpts, defaultSortOpts.KmeansOpts);
+sortOpts = mu.getorfull(sortOpts, defaultSortOpts);
+sortOpts.KmeansOpts = mu.getorfull(sortOpts.KmeansOpts, defaultSortOpts.KmeansOpts);
 
 if ~isfield(sortOpts, "fs") || isempty(sortOpts.fs)
     sortOpts.fs = data.streams.Wave.fs;
 end
 
 fs = sortOpts.fs;
-reselectT0 = getOr(sortOpts, 'reselectT0', defaultSortOpts.reselectT0); % sec
-reselectWindow = getOr(sortOpts, 'reselectWindow', defaultSortOpts.reselectWindow); % sec
+reselectT0 = mu.getor(sortOpts, 'reselectT0', defaultSortOpts.reselectT0); % sec
+reselectWindow = mu.getor(sortOpts, 'reselectWindow', defaultSortOpts.reselectWindow); % sec
 
 if isa(KorMethod, 'double') && KorMethod == fix(KorMethod)
     sortOpts.KmeansOpts.K = KorMethod;
@@ -124,7 +124,7 @@ if strcmp(thOpt, "reselect")
             ylabel('Wave amplitude (V)');
             xlim([reselectT0, reselectT0 + 10]); % show 10-sec wave
             title(['Channel ', num2str(channels(cIndex))]);
-            sortOpts.th(cIndex) = validateInput_beta("positive", ['Input th for channel ', num2str(channels(cIndex)), ' (unit: V): ']);
+            sortOpts.th(cIndex) = validateinput(['Input th for channel ', num2str(channels(cIndex)), ' (unit: V): '], @(x) x > 0);
         end
 
     end

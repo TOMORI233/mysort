@@ -39,7 +39,7 @@ if nargin < 3
     KselectionMethod = "gap";
 end
 
-KmeansOpts = getOrFull(KmeansOpts, defaultKmeansOpts);
+KmeansOpts = mu.getorfull(KmeansOpts, defaultKmeansOpts);
 
 %% PCA
 disp('Performing PCA on Waveforms...');
@@ -93,9 +93,7 @@ else
         [~, SSEs] = elbow_method(pcaData, KmeansOpts);
     elseif strcmpi(KselectionMethod, "preview")
         % Preview 3-D PCA space and use a user-specified K
-        Fig = figure;
-        % set(Fig, "outerposition", get(0, "screensize"));
-        maximizeFig(Fig);
+        Fig = figure("WindowState", "maximized");
 
         if size(pcaData, 2) >= 3
             plot3(pcaData(:, 1), pcaData(:, 2), pcaData(:, 3), 'k.', 'MarkerSize', 12, 'DisplayName', 'Raw PCA data');
@@ -117,7 +115,7 @@ else
         end
 
         drawnow;
-        K = validateInput_beta(["non-negative", "integer"], 'Input a K value for K-means (zero for auto-searching): ');
+        K = validateinput('Input a K value for K-means (zero for auto-searching): ', @(x) validateattributes(x, 'numeric', {'nonnegative', 'integer'}));
 
         if K == 0
             % elbow method

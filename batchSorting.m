@@ -73,8 +73,8 @@ end
 
 % sortOpts initialization
 run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
-sortOpts = getOrFull(sortOpts, defaultSortOpts);
-sortOpts.KmeansOpts = getOrFull(sortOpts.KmeansOpts, defaultSortOpts.KmeansOpts);
+sortOpts = mu.getorfull(sortOpts, defaultSortOpts);
+sortOpts.KmeansOpts = mu.getorfull(sortOpts.KmeansOpts, defaultSortOpts.KmeansOpts);
 
 KmeansOpts = sortOpts.KmeansOpts;
 scaleFactor = sortOpts.scaleFactor;
@@ -102,7 +102,7 @@ switch type
         for cIndex = 1:length(channels)
             disp('Applying highpass filter...');
             wave = waves(channels(cIndex), :);
-            wave = mFilter(double(wave), fs, "fhp", 300, "fnotch", 50);
+            wave = mu.filter(double(wave), fs, "fhp", 300, "fnotch", 50);
 
             disp('Extracting spikes...');
 

@@ -14,7 +14,7 @@ function Figs = plotNormalizedSSE(sortResult, visibilityOpt, colors)
     end
         
     if nargin < 3
-        colors = generateColorGrad(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
+        colors = mu.genColors(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
     end
 
     for eIndex = 1:length(sortResult)
@@ -29,7 +29,7 @@ function Figs = plotNormalizedSSE(sortResult, visibilityOpt, colors)
         colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(K / length(colors)) * length(colors), 1);
 
         for t1 = 1:K
-            mSubplot(Figs(eIndex), ceil(K / plotCol), plotCol, t1, [1, 1], [0.05, 0.05, 0.1, 0.1]);
+            mu.subplot(Figs(eIndex), ceil(K / plotCol), plotCol, t1, [1, 1], [0.05, 0.05, 0.1, 0.1]);
             % similarity of template t2 on cluster t1
             for t2 = 1:K
                 
