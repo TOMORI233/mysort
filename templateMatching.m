@@ -39,8 +39,8 @@ end
 
 %% Params Settings
 run(fullfile(fileparts(mfilename('fullpath')), 'config', 'defaultConfig.m'));
-sortOpts = getOrFull(sortResult0.sortOpts, defaultSortOpts);
-sortOpts.KmeansOpts = getOrFull(sortOpts.KmeansOpts, defaultSortOpts.KmeansOpts);
+sortOpts = mu.getorfull(sortResult0.sortOpts, defaultSortOpts);
+sortOpts.KmeansOpts = mu.getorfull(sortOpts.KmeansOpts, defaultSortOpts.KmeansOpts);
 
 if ~isfield(sortOpts, "fs") || isempty(sortOpts.fs)
     sortOpts.fs = data.streams.Wave.fs;
@@ -52,12 +52,12 @@ CVCRThreshold = sortOpts.CVCRThreshold;
 [~, waveSize] = size(sortResult0.wave);
 th = sortResult0.th;
 K = sortResult0.K;
-templates = getOr(sortResult0, "templates", genTemplates(sortResult0));
+templates = mu.getor(sortResult0, "templates", genTemplates(sortResult0));
 
 %% Loop for each selected channel
-for cIndex = 1:length(channels)
+for cIndex = 1:numel(channels)
     disp(['Sorting channel ', num2str(cIndex)]);
-    wave = data.streams.Wave.data(cIndex, :);
+    wave = data.streams.Wave.data(channels(cIndex), :);
 
     sortResult(cIndex, 1).K = K;
     sortResult(cIndex).sortOpts = sortOpts;

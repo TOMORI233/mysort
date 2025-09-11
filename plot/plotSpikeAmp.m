@@ -26,11 +26,11 @@ function FigsAmp = plotSpikeAmp(varargin)
     end
 
     mIp = inputParser;
-    mIp.addRequired("sortResult", @(x) validatestruct(x, "clusterIdx", @(y) validateattributes(y, 'numeric', {'vector'}), ...
-                                                     "spikeAmp", @(y) validateattributes(y, 'numeric', {'vector'}), ...
-                                                     "spikeTimeAll", @(y) validateattributes(y, 'numeric', {'vector'})));
+    mIp.addRequired("sortResult", @(x) mu.validatestruct(x, "clusterIdx", @(y) validateattributes(y, 'numeric', {'vector'}), ...
+                                                            "spikeAmp", @(y) validateattributes(y, 'numeric', {'vector'}), ...
+                                                            "spikeTimeAll", @(y) validateattributes(y, 'numeric', {'vector'})));
     mIp.addParameter("visible", "on", @(x) any(validatestring(x, {'on', 'off'})));
-    mIp.addParameter("colors", generateColorGrad(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]), ...
+    mIp.addParameter("colors", mu.genColors(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]), ...
                      @(x) cellfun(@(y) validateattributes(y, 'numeric', {'numel', 3, '>=', 0, '<=', 1}), x));
     mIp.parse(sortResult, varargin{:});
 
@@ -42,8 +42,8 @@ function FigsAmp = plotSpikeAmp(varargin)
         % Plot
         FigsAmp(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
 
-        mAxe1 = mSubplot(FigsAmp(eIndex), 1, 1, 1, [0.8, 1], "alignment", "center-left", "margin_left", 0, "paddings", paddings);
-        mAxe2 = mSubplot(FigsAmp(eIndex), 1, 1, 1, [0.15, 1], "alignment", "center-right", "margin_right", 0, "paddings", paddings);
+        mAxe1 = mu.subplot(FigsAmp(eIndex), 1, 1, 1, [0.8, 1], "alignment", "left-center", "margin_left", 0, "paddings", paddings);
+        mAxe2 = mu.subplot(FigsAmp(eIndex), 1, 1, 1, [0.15, 1], "alignment", "right-center", "margin_right", 0, "paddings", paddings);
 
         cm = uicontextmenu(FigsAmp(eIndex));
         mAxe1.ContextMenu = cm;

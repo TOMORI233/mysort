@@ -26,15 +26,14 @@ if nargin < 2
 end
 
 if nargin < 3
-    colors = generateColorGrad(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
+    colors = mu.genColors(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]);
 end
 
 PCx = PCShown(1);
 PCy = PCShown(2);
 
-Fig = figure;
-maximizeFig(Fig);
-ax = mSubplot(Fig, 1, 1, 1, 1, [0, 0, 0, 0], [0.1, 0.1, 0.1, 0.1]);
+Fig = figure("WindowState", "maximized");
+ax = mu.subplot(Fig, 1, 1, 1, 1, [0, 0, 0, 0], [0.1, 0.1, 0.1, 0.1]);
 
 cm = uicontextmenu(Fig);
 ax.ContextMenu = cm;
@@ -83,7 +82,7 @@ for index = 1:sortResult.K
     colorsAll = repmat(reshape(colors, [length(colors), 1]), ceil(sortResult.K / length(colors)) * length(colors), 1);
     plot(x, y, '.', 'MarkerSize', 12, 'Color', colorsAll{index}, 'DisplayName', ['cluster ' num2str(index)]); hold on;
     h = plot(cx, cy, 'kx', 'LineWidth', 1.2, 'MarkerSize', 15);
-    set(get(get(h, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');
+    mu.setLegendOff(h);
 end
 
 % Noise
@@ -130,7 +129,7 @@ function menuPlaceFcn(~, ~, Fig)
     set(Fig, "UserData", DTO);
     set(menus, "Enable", "on");
 end
-
+    
 function menuConfirmFcn(~, ~, Fig)
     uiresume(Fig);
 end
@@ -154,7 +153,7 @@ function menuViewFcn(~, ~, Fig, opt)
             plotNormalizedSSE(sortResult);
     end
 end
-
+    
 function menuChangePCFcn(~, ~, Fig)
     DTO = get(Fig, "UserData");
     sortResult = DTO.sortResult;

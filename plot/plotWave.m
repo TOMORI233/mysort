@@ -30,12 +30,12 @@ function [FigsWave, FigsTemplate] = plotWave(varargin)
     end
 
     mIp = inputParser;
-    mIp.addRequired("sortResult", @(x) validatestruct(x, "clusterIdx", @(y) validateattributes(y, 'numeric', {'vector'}), ...
-                                                     "wave", @(y) validateattributes(y, 'numeric', {'2d'}), ...
-                                                     "chanIdx", @(y) validateattributes(y, 'numeric', {'scalar', 'positive', 'integer'})));
+    mIp.addRequired("sortResult", @(x) mu.validatestruct(x, "clusterIdx", @(y) validateattributes(y, 'numeric', {'vector'}), ...
+                                                            "wave", @(y) validateattributes(y, 'numeric', {'2d'}), ...
+                                                            "chanIdx", @(y) validateattributes(y, 'numeric', {'scalar', 'positive', 'integer'})));
     mIp.addOptional("N", 200, @(x) validateattributes(x, 'numeric', {'scalar', 'positive', 'integer'}));
     mIp.addParameter("visible", "on", @(x) any(validatestring(x, {'on', 'off'})));
-    mIp.addParameter("colors", generateColorGrad(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]), ...
+    mIp.addParameter("colors", mu.genColors(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]), ...
                      @(x) cellfun(@(y) validateattributes(y, 'numeric', {'numel', 3, '>=', 0, '<=', 1}), x));
     mIp.parse(sortResult, varargin{:});
 
@@ -51,7 +51,7 @@ function [FigsWave, FigsTemplate] = plotWave(varargin)
             FigsWave(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
             clearvars ax
 
-            sortResult(eIndex).templates = getOr(sortResult(eIndex), "templates", genTemplates(sortResult(eIndex)));
+            sortResult(eIndex).templates = mu.getor(sortResult(eIndex), "templates", genTemplates(sortResult(eIndex)));
             if any(sortResult(eIndex).wave(sortResult(eIndex).clusterIdx == 0))
                 templates = [mean(sortResult(eIndex).wave(sortResult(eIndex).clusterIdx == 0, :), 1); genTemplates(sortResult(eIndex))];
             else
@@ -66,7 +66,7 @@ function [FigsWave, FigsTemplate] = plotWave(varargin)
                 if ~isempty(plotData)
                     stdValue = std(plotData, 0, 1);
 
-                    ax(kIndex) = mSubplot(FigsWave(eIndex), ceil(length(Ks) / plotCol), plotCol, kIndex, [1, 1], [0.05, 0.05, 0.1, 0.1]);
+                    ax(kIndex) = mu.subplot(FigsWave(eIndex), ceil(length(Ks) / plotCol), plotCol, kIndex, [1, 1], [0.05, 0.05, 0.1, 0.1]);
                     x = 1:size(plotData, 2);
                     xSmooth = linspace(min(x), max(x));
 
@@ -99,7 +99,7 @@ function [FigsWave, FigsTemplate] = plotWave(varargin)
                 end
 
             end
-            scaleAxes(ax(Ks ~= 0), "y", "on");
+            mu.scaleAxes(ax(Ks ~= 0), "y", "on");
 
             %Template of each cluster
             FigsTemplate(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
