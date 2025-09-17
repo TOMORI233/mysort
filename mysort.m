@@ -124,7 +124,7 @@ if strcmp(thOpt, "reselect")
             ylabel('Wave amplitude (V)');
             xlim([reselectT0, reselectT0 + 10]); % show 10-sec wave
             title(['Channel ', num2str(channels(cIndex))]);
-            sortOpts.th(cIndex) = validateinput(['Input th for channel ', num2str(channels(cIndex)), ' (unit: V): '], @(x) x > 0);
+            sortOpts.th(cIndex) = validateinput(['Input th for channel ', num2str(channels(cIndex)), ' (unit: V): '], @(x) validateattributes(x, 'numeric', {'scalar', 'real'}));
         end
 
     end

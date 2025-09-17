@@ -13,7 +13,7 @@ if nargin == 1
 end
 
 for eIndex = 1:length(sortResult)
-    Figs(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
+    Figs(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt); %#ok<AGROW>
 
     x = min([size(sortResult(eIndex).pcaData, 1) min(sortResult(eIndex).KArray)]):min([size(sortResult(eIndex).pcaData, 1) max(sortResult(eIndex).KArray)]);
 

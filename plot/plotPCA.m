@@ -29,9 +29,10 @@ else
 end
 
 mIp = inputParser;
-mIp.addRequired("sortResult", @(x) mu.validatestruct(x, "clusterIdx", @(y) validateattributes(y, 'numeric', {'vector'}), ...
-    "pcaData", @(y) validateattributes(y, 'numeric', {'2d'}), ...
-    "chanIdx", @(y) validateattributes(y, 'numeric', {'scalar', 'positive', 'integer'})));
+mIp.addRequired("sortResult", ...
+    @(x) mu.validatestruct(x, "clusterIdx", @(y) validateattributes(y, 'numeric', {'vector'}), ...
+                              "pcaData", @(y) validateattributes(y, 'numeric', {'2d'}), ...
+                              "chanIdx", @(y) validateattributes(y, 'numeric', {'scalar', 'positive', 'integer'})));
 mIp.addOptional("PCShown", [1, 2], @(x) validateattributes(x, 'numeric', {'vector', 'positive', 'integer'}));
 mIp.addParameter("visible", "on", @(x) any(validatestring(x, {'on', 'off'})));
 mIp.addParameter("colors", generateColorGrad(12, 'rgb', 'red', [1, 4, 7, 10], 'green', [2, 5, 8, 11], 'blue', [3, 6, 9, 12]), ...
@@ -52,7 +53,7 @@ else
 end
 
 for eIndex = 1:length(sortResult)
-    PCAFigs(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt);
+    PCAFigs(eIndex) = figure("WindowState", "maximized", "Visible", visibilityOpt); %#ok<AGROW>
     mAxe = mu.subplot(PCAFigs(eIndex), 1, 1, 1, 1, [0, 0, 0, 0], [0.1, 0.1, 0.1, 0.1]);
 
     cm = uicontextmenu(PCAFigs(eIndex));

@@ -88,7 +88,7 @@ switch type
         fs = sortOpts.fs; % Hz
         waveLength = sortOpts.waveLength; % sec
 
-        if length(th) ~= length(channels)
+        if numel(th) ~= numel(channels)
             error('batchSorting(): Number of ths not matched with number of channels');
         end
 
@@ -99,7 +99,7 @@ switch type
 
         %% Waveforms Extraction
         % For each channel
-        for cIndex = 1:length(channels)
+        for cIndex = 1:numel(channels)
             disp('Applying highpass filter...');
             wave = waves(channels(cIndex), :);
             wave = mu.filter(double(wave), fs, "fhp", 300, "fnotch", 50);
@@ -108,11 +108,21 @@ switch type
 
             try
                 waveGPU = gpuArray(wave);
-                [spikeAmpGPU, spikeIndexAllGPU] = findpeaks(waveGPU, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+                if th(cIndex) > 0
+                    [spikeAmpGPU, spikeIndexAllGPU] = findpeaks(waveGPU, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+                else
+                    [spikeAmpGPU, spikeIndexAllGPU] = findpeaks(-waveGPU, "MinPeakHeight", -th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+                    spikeAmpGPU = -spikeAmpGPU;
+                end
                 [spikeAmp, spikeIndexAll] = gather(spikeAmpGPU, spikeIndexAllGPU);
             catch
                 warning("GPU device unavailable. Using CPU...");
-                [spikeAmp, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+                if th(cIndex) > 0
+                    [spikeAmp, spikeIndexAll] = findpeaks(wave, "MinPeakHeight", th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+                else
+                    [spikeAmp, spikeIndexAll] = findpeaks(-wave, "MinPeakHeight", -th(cIndex), "MinPeakDistance", ceil(waveLength / 2 * fs));
+                    spikeAmp = -spikeAmp;
+                end
             end
 
             if isempty(spikeAmp)
